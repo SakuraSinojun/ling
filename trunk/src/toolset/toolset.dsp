@@ -66,8 +66,8 @@ LINK32=link.exe
 # PROP Output_Dir "Debug"
 # PROP Intermediate_Dir "Debug"
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /Yu"stdafx.h" /FD /GZ  /c
-# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /Yu"stdafx.h" /FD /GZ   /c
+# ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /Yu"stdafx.h" /FD /GZ /c
+# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /Yu"stdafx.h" /FD /GZ /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x804 /d "_DEBUG"
@@ -144,6 +144,22 @@ SOURCE=.\res\toolset.ico
 # Begin Source File
 
 SOURCE=.\res\toolset.rc2
+# End Source File
+# End Group
+# Begin Group "×ó²à±ßÀ¸"
+
+# PROP Default_Filter ""
+# End Group
+# Begin Group "µØÍ¼"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=.\ToolsetMap.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\ToolsetMap.h
 # End Source File
 # End Group
 # Begin Source File
