@@ -96,7 +96,19 @@ LINK32=link.exe
 # PROP Default_Filter ""
 # Begin Source File
 
+SOURCE=..\src\common\comdef.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\src\common\common.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\common\config.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\common\datafile.cpp
 # End Source File
 # Begin Source File
 
@@ -105,6 +117,22 @@ SOURCE=..\src\common\error.cpp
 # Begin Source File
 
 SOURCE=..\src\common\ling.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\common\Memory.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\common\Memory.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\common\preload.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\common\stdafx.h
 # End Source File
 # End Group
 # End Group
