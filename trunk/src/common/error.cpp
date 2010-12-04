@@ -8,7 +8,7 @@
 
 namespace common
 {
-        void com_error(const char * string, ...)
+        void Error(const char * string, ...)
         {
                 if (NULL == string)
                 {

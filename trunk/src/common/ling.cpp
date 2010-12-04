@@ -191,7 +191,7 @@ LRESULT CALLBACK _WndProc(HWND hwnd, UINT uMsg, WPARAM wParam,LPARAM lParam)
 		break;
 	case WM_LBUTTONDOWN:
 		buffer = (char *)pl::load("common.h", len);
-		MessageBox(NULL, buffer, "..", MB_OK);
+		MessageBox(hwnd, buffer, "..", MB_OK);
 		break;
 	case WM_RBUTTONDOWN:
 		pl::unload("common.h");

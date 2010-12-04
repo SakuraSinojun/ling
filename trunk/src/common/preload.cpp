@@ -74,13 +74,19 @@ void * _load_file(const char * filename, unsigned int& len)
 {
 	FILE_LINK * 	fl;
 	
-	fl = _find_file(filename);
+ 	fl = _find_file(filename);
 	if(fl == NULL)
 	{
 		fl = _add_file(filename);
 	}
-	len = fl->len;
-	return fl->content;
+	if(fl == NULL)
+	{
+		len = -1;
+		return NULL;
+	}else{
+		len = fl->len;
+		return fl->content;
+	}
 }
 
 void _unload_file(const char * filename)

@@ -144,7 +144,7 @@
 
 	void operator delete(void * p,const char * file,const int line)
 	{
-		com_error("内存分配失败！");
+		common::Error("内存分配失败！");
 		free(p);
 	}
 
