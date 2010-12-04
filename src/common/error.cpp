@@ -6,24 +6,28 @@
 #include <stdarg.h>	
 
 
-void com_error(const char * string, ...)
+namespace common
 {
-	if (NULL == string)
-	{
-		return;
-	}
+        void com_error(const char * string, ...)
+        {
+                if (NULL == string)
+                {
+                        return;
+                }
 
-	std::ofstream ofs("error.log", std::ios::app);
+                std::ofstream ofs("error.log", std::ios::app);
 
-	char buffer[1024];
-	va_list arglist;
+                char buffer[1024];
+                va_list arglist;
 
-	va_start(arglist, string);
-	vsprintf(buffer, string, arglist);
-	va_end(arglist);
+                va_start(arglist, string);
+                vsprintf(buffer, string, arglist);
+                va_end(arglist);
 
-	std::cout<<buffer<<std::endl;
-	ofs<<buffer;
-	ofs.close();
+                std::cout<<buffer<<std::endl;
+                ofs<<buffer;
+                ofs.close();
 
+        }
 }
+

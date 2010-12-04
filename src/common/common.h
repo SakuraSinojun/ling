@@ -10,12 +10,11 @@
 
 
 
-
-//最大长度1024字节
-void com_error(const char * string, ...);
-
-
-bool com_memory_report(char * report, int len);
+namespace common
+{
+        void Error(const char * string, ...);
+        bool MemoryReport(char * report, int len);
+}
 
 
 //这个名字空间里的函数用于加载文件.
