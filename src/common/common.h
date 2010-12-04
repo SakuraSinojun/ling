@@ -15,6 +15,7 @@
 void com_error(const char * string, ...);
 
 
+bool com_memory_report(char * report, int len);
 
 
 //这个名字空间里的函数用于加载文件.
@@ -24,8 +25,7 @@ namespace pl
 {
 	void * load(const char * filename, unsigned int& __out__len);	
 	void unload(const char * filename);
-	void unloadall();
-	
+	void unloadall();	
 }
 
 #endif
