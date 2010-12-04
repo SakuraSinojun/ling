@@ -83,37 +83,36 @@
 	}
 	
 
-	bool MemoryReport(char * report,int len)
-	{
-		CMLink * _lk=first;
-		char temp[150];
-		
-		memset(report,0,len);
-		
-		int lenused=0;
-		int l=150;
-
-		while(_lk!=0)
-		{
-			//_set_printf_count_output(1);
-			sprintf(temp,"未释放的内存:地址：0x00%x，大小：%d字节，分配于%s的第%d行。\n",(long)_lk->pointer,_lk->size,_lk->file,_lk->line);
-			lenused+=l;
-			
-			if(lenused>=len)
-				return false;
-			if(strcat(report, temp)!=0)
-				return false;
-			_lk=_lk->next;
-		}
-		
-		return true;
-
-	}
-
-        bool com_memory_report(char * report, int len)
+        namespace common
         {
-                return MemoryReport(report, len);
+                bool MemoryReport(char * report,int len)
+                {
+                        CMLink * _lk=first;
+                        char temp[150];
+                        
+                        memset(report,0,len);
+                        
+                        int lenused=0;
+                        int l=150;
+
+                        while(_lk!=0)
+                        {
+                                //_set_printf_count_output(1);
+                                sprintf(temp,"未释放的内存:地址：0x00%x，大小：%d字节，分配于%s的第%d行。\n",(long)_lk->pointer,_lk->size,_lk->file,_lk->line);
+                                lenused+=l;
+                                
+                                if(lenused>=len)
+                                        return false;
+                                if(strcat(report, temp)!=0)
+                                        return false;
+                                _lk=_lk->next;
+                        }
+                        
+                        return true;
+
+                }
         }
+        
 
 
 	void *__cdecl operator new(size_t size,const char * file,const int line)

@@ -20,7 +20,7 @@ void operator delete(void * p,const char * file,const int line);
 
 void operator delete(void * p);
 void operator delete[] (void * p);
-bool MemoryReport(char * report,int len);
+//bool MemoryReport(char * report,int len);
 
 
 
