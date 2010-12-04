@@ -13,13 +13,6 @@ void CalcFPS();
 BOOL OnIdle(LONG count);
 void CreateLingWindow(WNDPROC _lpfnWindowProc, int width, int height, bool onidle);
 
-BOOL OnIdle(LONG count)
-{
-	CalcFPS();
-	return TRUE;
-}
-
-
 
 
 
@@ -161,6 +154,17 @@ void CalcFPS()
 
 
 
+////////////////////////////////////////////////////////////////////////////////
+
+BOOL OnIdle(LONG count)
+{
+	CalcFPS();
+	return TRUE;
+}
+
+void OnPaint(HWND hWnd, HDC hdc)
+{
+}
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -169,7 +173,9 @@ LRESULT CALLBACK _WndProc(HWND hwnd, UINT uMsg, WPARAM wParam,LPARAM lParam)
 { 
 
 	PAINTSTRUCT 	ps;
-
+	char	*	buffer;
+	unsigned int	len;
+	
 	switch(uMsg) 
 	{
 	case WM_CLOSE:
@@ -178,7 +184,19 @@ LRESULT CALLBACK _WndProc(HWND hwnd, UINT uMsg, WPARAM wParam,LPARAM lParam)
 	case WM_DESTROY:
 		exit(0);
 		break;
-	default:  
+	case WM_PAINT:
+		BeginPaint (hwnd, &ps);
+		OnPaint(hwnd, ps.hdc);
+		EndPaint (hwnd,&ps);
+		break;
+	case WM_LBUTTONDOWN:
+		buffer = (char *)pl::load("common.h", len);
+		MessageBox(NULL, buffer, "..", MB_OK);
+		break;
+	case WM_RBUTTONDOWN:
+		pl::unload("common.h");
+		break;
+	default:
 		return DefWindowProc(hwnd,uMsg,wParam,lParam); 
 	} 
  	return 0; 
