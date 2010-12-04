@@ -110,9 +110,14 @@
 
 	}
 
+        bool com_memory_report(char * report, int len)
+        {
+                return MemoryReport(report, len);
+        }
+
 
 	void *__cdecl operator new(size_t size,const char * file,const int line)
-    {  
+        {  
 		//void * p = ::operator new(size);
 		void *p=malloc(size);
 
@@ -122,7 +127,7 @@
 		_cm->AddToLink (p,size,file,line);
 
 		return (p);
-    }
+        }
 
 	void operator delete(void * p)
 	{
