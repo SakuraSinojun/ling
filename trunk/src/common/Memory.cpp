@@ -1,11 +1,9 @@
+
 #include "Memory.h"
 #include <malloc.h>
-//#include <stdio.h>
 #include <string>
-
-#include "stdafx.h"
-
 #include <windows.h>
+#include "common.h"
 
 
 #ifdef MEMCHECK
@@ -37,7 +35,7 @@
 			}
 			last=this;
 			size=_size;
-			strcpy_s(file,_file);
+			strcpy(file,_file);
 			line=_line;
 			_MemorySize+=size;
 		}
@@ -98,12 +96,12 @@
 		while(_lk!=0)
 		{
 			//_set_printf_count_output(1);
-			sprintf_s(temp,"未释放的内存:地址：0x00%x，大小：%d字节，分配于%s的第%d行。\n",(long)_lk->pointer,_lk->size,_lk->file,_lk->line);
+			sprintf(temp,"未释放的内存:地址：0x00%x，大小：%d字节，分配于%s的第%d行。\n",(long)_lk->pointer,_lk->size,_lk->file,_lk->line);
 			lenused+=l;
 			
 			if(lenused>=len)
 				return false;
-			if(strcat_s(report,len,temp)!=0)
+			if(strcat(report, temp)!=0)
 				return false;
 			_lk=_lk->next;
 		}
@@ -113,8 +111,8 @@
 	}
 
 
-	void *__cdecl operator new(size_t size,const char * file,const int line) throw(...)
-    {   
+	void *__cdecl operator new(size_t size,const char * file,const int line)
+    {  
 		//void * p = ::operator new(size);
 		void *p=malloc(size);
 
@@ -140,9 +138,9 @@
 		free(p);
 	}
 
-	void operator delete(void * p,const char * file,const int line) throw(...)
+	void operator delete(void * p,const char * file,const int line)
 	{
-		TRACE("内存分配失败！");
+		com_error("内存分配失败！");
 		free(p);
 	}
 
