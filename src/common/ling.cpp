@@ -1,10 +1,18 @@
-
-
 #include "common.h"
+#include "Game.h"
 
 #include <windows.h>
 #include <stdio.h>
 
+
+#define SCREEN_WIDTH 640
+#define SCREEN_HEIGHT 480
+#define SCREEN_BPP 32
+#define MAX_COLOR 256
+#define WINDOW_MODE	1
+
+
+CGame game;
 
 
 
@@ -24,9 +32,9 @@ void CreateLingWindow(WNDPROC _lpfnWindowProc, int width, int height, bool onidl
 
 
 
-void CreateLingWindow(WNDPROC _lpfnWindowProc, int width, int height, bool onidle = false)
+void CreateLingWindow(WNDPROC _lpfnWindowProc, int width, int height, bool onidle = true)
 {
-	HWND		hWnd;
+        HWND		hWnd;
 	HINSTANCE	hInstance;
 	
 	hInstance = GetModuleHandle(NULL);
@@ -48,8 +56,8 @@ void CreateLingWindow(WNDPROC _lpfnWindowProc, int width, int height, bool onidl
 	RECT	rect;
 	rect.left = 0;
 	rect.top = 0;
-	rect.right = width;
-	rect.bottom = height;
+	rect.right = SCREEN_WIDTH;
+	rect.bottom = SCREEN_HEIGHT;
 	AdjustWindowRect(&rect, dwStyle, FALSE);
 	
 	hWnd = CreateWindow("LINGWINDOW",
@@ -65,14 +73,49 @@ void CreateLingWindow(WNDPROC _lpfnWindowProc, int width, int height, bool onidl
 				NULL); 
 	
 	ShowWindow (hWnd,SW_SHOWNORMAL); 
+
+
+ 
+       
+
+/*	RECT rcClient = {0, 0, SCREEN_WIDTH - 1,SCREEN_HEIGHT - 1};
+
+	if(WINDOW_MODE)
+	{
+		hWnd = CreateWindow ("ling", TEXT("ling"), WS_OVERLAPPED | WS_SYSMENU | WS_CAPTION,
+			CW_USEDEFAULT, CW_USEDEFAULT, SCREEN_WIDTH, SCREEN_HEIGHT, NULL, NULL, hInstance, NULL);
+	
+		AdjustWindowRectEx(&rcClient,
+			GetWindowLong(hWnd,GWL_STYLE),
+			GetMenu(hWnd) != NULL, 
+			GetWindowLong(hWnd,GWL_EXSTYLE)); 
+
+		MoveWindow(hWnd, 50 ,50 ,rcClient.right - rcClient.left, rcClient.bottom - rcClient.top,true);
+
+		ShowWindow(hWnd, SW_SHOW);
+	}
+	else
+	{
+		hWnd = CreateWindow ("ling", TEXT("hello win32"), WS_POPUP | WS_VISIBLE, 0, 
+			0, SCREEN_WIDTH, SCREEN_HEIGHT, NULL, NULL, hInstance, NULL);
+	}*/
+        
+        
 	
 	MSG 		msgCur; 
 	bool		idle=true;
 	int		count = 0;
 	
 
+               
 	if(onidle)
 	{
+                if(!game.InitGame(SCREEN_WIDTH,SCREEN_HEIGHT,WINDOW_MODE, hWnd))
+                {
+                        MessageBox(NULL, "initGame fail", "´íÎó", 0);
+                        return;
+                }
+
 		while(true)
 		{
 			if (::PeekMessage(&msgCur, NULL, 0, 0, PM_NOREMOVE))
@@ -95,6 +138,12 @@ void CreateLingWindow(WNDPROC _lpfnWindowProc, int width, int height, bool onidl
 			}else{
 				::WaitMessage();
 			}
+
+                        if(!game.GameLoop())
+                        {
+                                MessageBox(NULL, "game loop fail", "´íÎó", 0);
+                                return ;
+                        }
 		}
 	}else{
 		while(GetMessage(&msgCur, NULL, 0, 0))  {
@@ -102,6 +151,8 @@ void CreateLingWindow(WNDPROC _lpfnWindowProc, int width, int height, bool onidl
 			DispatchMessage(&msgCur);
 		}
 	}
+
+        game.ShutGame();
 
 	return ;
 }

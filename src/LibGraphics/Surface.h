@@ -7,7 +7,7 @@ public:
         CSurface(){}
         ~CSurface(){}
 	
-	virtual bool CreateMainWnd(int width,int height, bool bWindow = true, HWND = NULL)=0;
+	virtual bool CreateMainWnd(int width,int height, bool bWindow, HWND)=0;
         virtual bool Create(int width, int height)=0;
 	virtual void ShutDown()=0;
 	virtual bool LoadBitmap(const char *fileName)=0;
