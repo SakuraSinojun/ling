@@ -116,6 +116,14 @@ SOURCE=..\src\common\error.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\src\common\Game.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\common\Game.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\src\common\ling.cpp
 # End Source File
 # Begin Source File
@@ -133,6 +141,46 @@ SOURCE=..\src\common\preload.cpp
 # Begin Source File
 
 SOURCE=..\src\common\stdafx.h
+# End Source File
+# End Group
+# Begin Group "LibGraphics"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\src\LibGraphics\LibDDraw\DDrawCommon.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\LibGraphics\LibDDraw\DDrawCommon.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\LibGraphics\LibDDraw\DxSurface.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\LibGraphics\LibDDraw\DxSurface.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\LibGraphics\LibDDraw\Geometry.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\LibGraphics\LibDDraw\geometry.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\LibGraphics\LibDDraw\LibDDraw.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\LibGraphics\LibGraphics.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\LibGraphics\Surface.h
 # End Source File
 # End Group
 # End Group

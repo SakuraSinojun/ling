@@ -1,4 +1,4 @@
-
+#include "../../common/common.h"
 #include "DDrawCommon.h"
 #include "Geometry.h"
 #include "DxSurface.h"
@@ -204,7 +204,7 @@ bool CDxSurface::Create(int width, int height)
 		return false;
 	}
 
-	if(!com_createSurface(GetPtr(),s_lpdd ,width, height,0))
+	if(!com_createSurface(this->GetPtr(),s_lpdd ,width, height,0))
 	{
 		WriteError("创建画面失败");
 		return false;
@@ -219,7 +219,7 @@ bool CDxSurface::Create(int width, int height)
 
 void CDxSurface::ShutDown()
 {
-	if(m_bMainWnd)
+/*	if(m_bMainWnd)
 	{
 		if (s_lpddClipperWin)
 		{
@@ -238,7 +238,7 @@ void CDxSurface::ShutDown()
 			s_lpdd->Release();
 			s_lpdd = NULL;
 		}
-	}
+	}*/
 
         if(NULL != m_ptr)
 	{
@@ -363,7 +363,7 @@ void CDxSurface::Init()
 
 void CDxSurface::WriteError(const char *error)
 {
-	
+        common::Error(error);
 }
 
 //----------------------------------------------------------/
@@ -394,14 +394,21 @@ bool CDxSurface::LoadBitmap(const char *fileName)
                 return false;
         }
 
-        // loadbmp
+        BMPINFOHEADER info;
 
-        int bmpWidth = 0;
-        int bmpHeight = 0;
-        char *bmpBuf = NULL;
+        char *bmpBuf = (char*)res::loadimg(fileName, &info);
+        if(NULL == bmpBuf)
+        {
+                WriteError("加载位图失败");
+                return false;
+        }
+
+        //this->ShutDown();
+        //this->Create(info.biWidth, info.biHeight);
 
         int lPitch;
         BYTE *surBuf = com_lockSurface(this->GetPtr(),lPitch);
+
         if(NULL == surBuf)
         {
                 WriteError("锁定dx画面失败");
@@ -409,12 +416,13 @@ bool CDxSurface::LoadBitmap(const char *fileName)
         }
         
         geo_copyBuf((DWORD *)surBuf, (DWORD *)bmpBuf,
-		    ((int)lPitch)>>2, bmpWidth, bmpWidth, bmpHeight);
+		    ((int)lPitch)>>2, info.biWidth, info.biWidth, info.biHeight);
 
         if(!com_unlockSurface(GetPtr()))
         {
                 WriteError("解除锁定dx画面失败");
                 return false;
         }
+
         return true;
 }

@@ -40,7 +40,7 @@ public:
         int GetHeight() const {return m_height;}
 
         // surfaceµÄÉè¶¨
-	bool CreateMainWnd(int width,int height, bool bWindow = true, HWND = NULL);
+	bool CreateMainWnd(int width,int height, bool bWindow, HWND hWnd);
 	bool Create(int width, int height);
 	void ShutDown();
         bool SetColorKey(DWORD color);
