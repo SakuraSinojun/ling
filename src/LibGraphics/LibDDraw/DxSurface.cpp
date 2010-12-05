@@ -24,6 +24,7 @@ bool                 CDxSurface::s_bWindow        = true;
 CDxSurface::CDxSurface(const CDxSurface &orig):m_ptr(orig.m_ptr)
 {
 	++m_ptr->m_use;
+        this->Init();
 }
 
 //-------------------------------------------------------------------/
@@ -38,6 +39,8 @@ CDxSurface &CDxSurface::operator= (const CDxSurface& rhs)
 	}
 	m_ptr = rhs.m_ptr;
 	
+        this->Init();
+
 	return *this;
 }
 
@@ -45,14 +48,7 @@ CDxSurface &CDxSurface::operator= (const CDxSurface& rhs)
 
 CDxSurface::~CDxSurface()
 {
-	if(NULL != m_ptr)
-	{
-		if(--m_ptr->m_use == 0)
-		{
-			delete m_ptr;
-			m_ptr = NULL;
-		}
-	}
+        this->ShutDown();
 }
 
 //------------------------------------------------------------------------------/
@@ -64,6 +60,12 @@ bool CDxSurface::CreateMainWnd(int width,int height, bool bWindow, HWND hWnd)
                 WriteError("窗口模式必须传递窗口句柄");
                 return false;
         }
+
+        if(s_lpdd)
+        {
+                 WriteError("主窗口已经存在");
+                return false;
+        }
 	
 	m_width = width;
 	m_height = height;
@@ -71,10 +73,12 @@ bool CDxSurface::CreateMainWnd(int width,int height, bool bWindow, HWND hWnd)
 	s_hWnd = hWnd;
 	s_bWindow = bWindow;
 
-	DDSURFACEDESC2 ddsd;
-	InitStruct(ddsd);
+        // 标识此实例是否为主窗口，用于选择释放资源
 
         m_bMainWnd = true;
+
+	DDSURFACEDESC2 ddsd;
+	InitStruct(ddsd);
 
 	// 初始化DxDraw
 
@@ -219,7 +223,7 @@ bool CDxSurface::Create(int width, int height)
 
 void CDxSurface::ShutDown()
 {
-/*	if(m_bMainWnd)
+	if(m_bMainWnd)
 	{
 		if (s_lpddClipperWin)
 		{
@@ -238,7 +242,7 @@ void CDxSurface::ShutDown()
 			s_lpdd->Release();
 			s_lpdd = NULL;
 		}
-	}*/
+	}
 
         if(NULL != m_ptr)
 	{

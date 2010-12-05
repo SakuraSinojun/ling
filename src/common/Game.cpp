@@ -24,8 +24,12 @@ bool CGame::InitGame(int width,int height, bool bWindow, HWND hWnd)
                 return false;
         }
 
+        if(!m_meinv->Create(640, 480))
+        {
+                return false;
+        }
 
-        if(!m_gameWnd->LoadBitmap("..//res//bg1.bmp"))
+        if(!m_meinv->LoadBitmap("..//res//bg1.bmp"))
         {
                 return false;
         }
@@ -38,6 +42,8 @@ bool CGame::GameLoop()
         _StartClock();
 
         RECT rc = {50, 50, 100, 100};
+
+        m_gameWnd->AttachSurface(m_meinv, 0, 0);
 
         m_gameWnd->DrawSolidRect(ARGB(0, 255, 0, 255), &rc);
         m_gameWnd->Flip();
