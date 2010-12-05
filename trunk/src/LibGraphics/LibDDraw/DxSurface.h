@@ -32,8 +32,8 @@ class CDxSurface :public CSurface
         };
 public:
         // 各种构造函数和赋值函数
-        CDxSurface():m_ptr(new AutoSurPtr(NULL)){}
-	//CDxSurface(LPDIRECTDRAWSURFACE7 lpSur = NULL):m_ptr(new AutoSurPtr(lpSur)){}
+        //CDxSurface():m_ptr(new AutoSurPtr(NULL)){this->Init();}
+	CDxSurface(LPDIRECTDRAWSURFACE7 lpSur = NULL):m_ptr(new AutoSurPtr(lpSur)){this->Init();}
 
         // 返回surface信息
         int GetWidth() const {return m_width;}
