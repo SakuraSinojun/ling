@@ -1,11 +1,10 @@
 #ifndef DXSURFACE_H_WD101204
 #define DXSURFACE_H_WD101204
 
-#define DEF_BPP 16	// 默认色彩格式
+#define DEF_BPP 32	// 默认色彩格式
 
 #include "Surface.h"
 #include <ddraw.h>
-class CSurface;
 
 class CDxSurface :public CSurface
 {
@@ -57,7 +56,9 @@ public:
         bool Flip();
 
         // 位图相关
-        bool LoadBitmap(const char *fileName);
+        bool CreateBitmap(const char *fileName);
+        bool LoadBitmap(const char *fileName, int surX, int surY,  
+                int bmpX, int bmpY, int width, int height);
 
 protected:
 
@@ -66,7 +67,7 @@ protected:
 	void Init();
 
         // 错误处理
-        void WriteError(const char *error);
+        void WriteError(const char *error, ...);
 
         // 返回指针信息
 	inline LPDIRECTDRAWSURFACE7& GetPtr();
@@ -88,6 +89,8 @@ protected:
 	static LPDIRECTDRAWCLIPPER  s_lpddClipperWin;   // WINDOWS窗口的剪切区域
 	static HWND s_hWnd;                             // 关联的窗口句柄
         static bool s_bWindow;                          // SURFACE是否在窗口模式下运行
+        static int s_mainWndWidth;
+        static int s_mainWndHeight;
 	
 
 };
