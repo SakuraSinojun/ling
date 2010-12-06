@@ -26,19 +26,12 @@ bool CGame::InitGame(int width,int height, bool bWindow, HWND hWnd)
                 return false;
         }
 
-        if(!m_gameWnd->LoadBitmap("..//res//bg1.bmp"))
+        if(!m_gameWnd->LoadBitmap("..//res//bg1.bmp", 0, 0, 0, 0, 640, 480))
         {
                 return false;
         }
-
-           
-
-        if(!m_meinv->Create(320, 200))
-        {
-                return false;
-        }
-
-        if(!m_meinv->LoadBitmap("..//res//Quensp5_24.bmp"))
+   
+        if(!m_meinv->CreateBitmap("..//res//Quensp5_24.bmp"))
         {
                 return false;
         }
