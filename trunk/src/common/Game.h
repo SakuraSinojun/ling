@@ -1,7 +1,7 @@
 #ifndef GAME_H_101205
 #define GAME_H_101205
 
-#include "../LibGraphics/LibGraphics.h"
+#include "../LibGraphic/LibGraphic.h"
 
 class CGame
 {
