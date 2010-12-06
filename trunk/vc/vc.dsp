@@ -143,44 +143,44 @@ SOURCE=..\src\common\preload.cpp
 SOURCE=..\src\common\stdafx.h
 # End Source File
 # End Group
-# Begin Group "LibGraphics"
+# Begin Group "LibGraphic"
 
 # PROP Default_Filter ""
 # Begin Source File
 
-SOURCE=..\src\LibGraphics\LibDDraw\DDrawCommon.cpp
+SOURCE=..\src\LibGraphic\DDrawCommon.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\src\LibGraphics\LibDDraw\DDrawCommon.h
+SOURCE=..\src\LibGraphic\DDrawCommon.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\src\LibGraphics\LibDDraw\DxSurface.cpp
+SOURCE=..\src\LibGraphic\DxSurface.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\src\LibGraphics\LibDDraw\DxSurface.h
+SOURCE=..\src\LibGraphic\DxSurface.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\src\LibGraphics\LibDDraw\Geometry.cpp
+SOURCE=..\src\LibGraphic\Geometry.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=..\src\LibGraphics\LibDDraw\geometry.h
+SOURCE=..\src\LibGraphic\geometry.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\src\LibGraphics\LibDDraw\LibDDraw.h
+SOURCE=..\src\LibGraphic\LibDDraw.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\src\LibGraphics\LibGraphics.h
+SOURCE=..\src\LibGraphic\LibGraphic.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\src\LibGraphics\Surface.h
+SOURCE=..\src\LibGraphic\Surface.h
 # End Source File
 # End Group
 # End Group
