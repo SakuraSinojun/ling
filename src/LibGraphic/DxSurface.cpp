@@ -1,4 +1,5 @@
 #include "../common/common.h"
+#include "../Script/bitmap.h"
 #include "DDrawCommon.h"
 #include "Geometry.h"
 #include "DxSurface.h"
@@ -204,15 +205,23 @@ bool CDxSurface::CreateMainWnd(int width,int height, bool bWindow, HWND hWnd)
 }
 
 //-----------------------------------------------------------------/
-bool CDxSurface::Create(int width, int height)
+bool CDxSurface::Create(const CSurface *mainSur, int width, int height)
 {
-	if(!s_lpdd)
+        if(mainSur == NULL)
+        {
+                WriteError("主画面获取失败");
+                return false;
+        }
+
+        CDxSurface *dxsur = (CDxSurface *)mainSur;
+        LPDIRECTDRAW7 lpdd = dxsur->GetDDraw();
+	if(!lpdd)
 	{
 		WriteError("主画面没有创建");
 		return false;
 	}
 
-	if(!com_createSurface(this->m_ptr->m_lpddSur,s_lpdd ,width, height,0))
+	if(!com_createSurface(this->m_ptr->m_lpddSur,lpdd ,width, height,0))
 	{
 		WriteError("创建画面失败");
 		return false;
@@ -221,6 +230,71 @@ bool CDxSurface::Create(int width, int height)
         m_width = width;
         m_height = height;
 	return true;
+}
+
+void CDxSurface::SetPtr(LPDIRECTDRAWSURFACE7 lpSur)
+{
+	m_ptr->m_lpddSur = lpSur;
+}
+
+bool CDxSurface::CreateBitmapSur(const CSurface *mainSur, const char *fileName)
+{
+        if(m_bMainWnd)
+        {
+                // 如果是主画面，则不能创建
+
+                return false;
+        }
+
+        if(NULL == fileName)
+        {
+                return false;
+        }
+
+        // 位图加载
+        BMPINFOHEADER info;
+        char *bmpBuf = (char*)res::loadimg(fileName, &info);
+        if(NULL == bmpBuf)
+        {
+                WriteError("加载位图 %s 失败", fileName);
+                return false;
+        }
+
+        // 尺寸检测
+        if(info.biWidth > s_mainWndWidth || info.biHeight > s_mainWndHeight)
+        {
+                WriteError("位图 %s 尺寸大于窗口尺寸", fileName);
+                pl::unload(fileName);
+                return false;
+        }
+
+        this->Create(mainSur, info.biWidth, info.biHeight);
+
+        // 锁定画面
+        int lPitch;
+        BYTE *surBuf = com_lockSurface(this->GetPtr(),lPitch);
+        if(NULL == surBuf)
+        {
+                WriteError("锁定dx画面失败");
+                pl::unload(fileName);
+                return false;
+        }
+        
+        // 拷贝内存
+        geo_copyBuf((DWORD *)surBuf, (DWORD *)bmpBuf,
+		    ((int)lPitch)>>2, info.biWidth, info.biWidth, info.biHeight);
+
+        // 解锁
+        if(!com_unlockSurface(GetPtr()))
+        {
+                WriteError("解除锁定dx画面失败");
+                pl::unload(fileName);
+                return false;
+        }
+
+        pl::unload(fileName);
+
+        return true;
 }
 
 //----------------------------------------------------------------------/
@@ -402,71 +476,7 @@ const LPDIRECTDRAWSURFACE7 &CDxSurface::GetPtr() const
 
 //-----------------------------------------------------------/
 
-void CDxSurface::SetPtr(LPDIRECTDRAWSURFACE7 lpSur)
-{
-	m_ptr->m_lpddSur = lpSur;
-}
-
-bool CDxSurface::CreateBitmap(const char *fileName)
-{
-        if(m_bMainWnd)
-        {
-                // 如果是主画面，则不能创建
-
-                return false;
-        }
-        if(NULL == fileName)
-        {
-                return false;
-        }
-
-        // 位图加载
-        BMPINFOHEADER info;
-        char *bmpBuf = (char*)res::loadimg(fileName, &info);
-        if(NULL == bmpBuf)
-        {
-                WriteError("加载位图 %s 失败", fileName);
-                return false;
-        }
-
-        // 尺寸检测
-        if(info.biWidth > s_mainWndWidth || info.biHeight > s_mainWndHeight)
-        {
-                WriteError("位图 %s 尺寸大于窗口尺寸", fileName);
-                pl::unload(fileName);
-                return false;
-        }
-
-        this->Create(info.biWidth, info.biHeight);
-
-        // 锁定画面
-        int lPitch;
-        BYTE *surBuf = com_lockSurface(this->GetPtr(),lPitch);
-        if(NULL == surBuf)
-        {
-                WriteError("锁定dx画面失败");
-                pl::unload(fileName);
-                return false;
-        }
-        
-        // 拷贝内存
-        geo_copyBuf((DWORD *)surBuf, (DWORD *)bmpBuf,
-		    ((int)lPitch)>>2, info.biWidth, info.biWidth, info.biHeight);
-
-        // 解锁
-        if(!com_unlockSurface(GetPtr()))
-        {
-                WriteError("解除锁定dx画面失败");
-                pl::unload(fileName);
-                return false;
-        }
-
-        pl::unload(fileName);
-
-        return true;
-}
-
-bool CDxSurface::LoadBitmap(const char *fileName, int surX, int surY,  
+bool CDxSurface::LoadBitmapFile(const char *fileName, int surX, int surY,  
                 int bmpX, int bmpY, int width, int height)
 {
         if(NULL == fileName)
@@ -518,6 +528,50 @@ bool CDxSurface::LoadBitmap(const char *fileName, int surX, int surY,
         }
 
         pl::unload(fileName);
+
+        return true;
+}
+
+bool CDxSurface::LoadBitmap(const CBitmap &bmp, int surX, int surY,  
+                int bmpX, int bmpY, int width, int height)
+{
+        if(!bmp.IsLoaded())
+        {
+                return false;
+        }
+
+        // 尺寸检测
+        if(bmp.GetWidth() > m_width-surX || bmp.GetHeight() > m_height-surY)
+        {
+                WriteError("位图 %s 加载超出画面尺寸范围");
+                return false;
+        }
+
+        // 锁定画面
+        int lPitch;
+        BYTE *surBuf = com_lockSurface(this->m_ptr->m_lpddSur,lPitch);
+        if(NULL == surBuf)
+        {
+                WriteError("锁定dx画面失败");
+                return false;
+        }
+
+        char *bmpBuf = bmp.GetBuffer();
+        
+        // 重新调整起始位置
+        surBuf = surBuf + surX + surY * lPitch;
+        bmpBuf = bmpBuf + bmpX + bmpY * bmp.GetWidth();
+
+        // 拷贝内存
+        geo_copyBuf((DWORD *)surBuf, (DWORD *)bmpBuf,
+		    ((int)lPitch)>>2, bmp.GetWidth(), width, height);
+
+        // 解锁画面
+        if(!com_unlockSurface(GetPtr()))
+        {
+                WriteError("解除锁定dx画面失败");              
+                return false;
+        }
 
         return true;
 }

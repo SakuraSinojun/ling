@@ -6,6 +6,8 @@
 #include "Surface.h"
 #include <ddraw.h>
 
+class CBitmap;
+
 class CDxSurface :public CSurface
 {
         // 智能指针类
@@ -40,10 +42,11 @@ public:
         // 返回surface信息
         int GetWidth() const {return m_width;}
         int GetHeight() const {return m_height;}
+        LPDIRECTDRAW7 GetDDraw(){return s_lpdd;}
 
         // surface的设定
 	bool CreateMainWnd(int width,int height, bool bWindow, HWND hWnd);
-	bool Create(int width, int height);
+	bool Create(const CSurface *mainSur, int width, int height);
 	void ShutDown();
         bool SetColorKey(DWORD color);
 
@@ -56,8 +59,10 @@ public:
         bool Flip();
 
         // 位图相关
-        bool CreateBitmap(const char *fileName);
-        bool LoadBitmap(const char *fileName, int surX, int surY,  
+        bool CreateBitmapSur(const CSurface *mainSur, const char *fileName);
+        bool LoadBitmapFile(const char *fileName, int surX, int surY,  
+                int bmpX, int bmpY, int width, int height);
+        bool LoadBitmap(const CBitmap &bmp, int surX, int surY,  
                 int bmpX, int bmpY, int width, int height);
 
 protected:

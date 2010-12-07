@@ -1,6 +1,7 @@
 
-
-
+#include "../common/common.h"
+#include "../LibGraphic/LibGraphic.h"
+#include "bitmap.h"
 #include "map.h"
 
 
@@ -18,6 +19,7 @@ CMap::CMap()
 CMap::~CMap ()
 {
 	m_map = NULL;
+        m_mainSur = NULL;
 }
 
 CMap * CMap::GetMap ()
@@ -31,24 +33,50 @@ CMap * CMap::GetMap ()
 
 
 
-void CMap::Create(int width, int height)
+bool CMap::Create(CSurface *sur, int width, int height, int cellWidth, int cellHeight)
 {
 	
-	if(width<=0 || height<=0)
+	if(width<=0 || height<=0 || cellWidth<=0 || cellHeight<=0)
 	{
-		return;
+                common::Error("地图尺寸不能为负值");
+		return false;
 	}
 
 	if (m_square != NULL)
 	{
 		free (m_square);
 	}
+
+        if(NULL == sur)
+        {
+                common::Error("加载兼容主画面失败");
+                return false;
+        }
 	m_square = (MAPSQUARE *)malloc(sizeof(MAPSQUARE) * width * height);
 	m_width = width;
 	m_height = height;
+        m_mainSur = sur;
+
+        return true;
 
 }
 
+bool CMap::AddFrame(const CBitmap &bmp, int frameIndex, int x, int y, int mode)
+{
+        if(!bmp.IsLoaded())
+        {
+                common::Error("加载地图元素失败,位图没有被加载");
+                return false;
+        }
+
+        CSurface *tmpSur = new CDxSurface;
+
+        tmpSur->Create(m_mainSur, m_cellWidth, m_cellWidth);
+
+ 
+
+        return true;
+}
 
 void CMap::SetBackground(int x, int y, int x1, int y1, int x2, int y2, const char * filename)
 {
