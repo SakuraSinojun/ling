@@ -1,6 +1,8 @@
 #ifndef SURFACE_H_011204
 #define SURFACE_H_011204
 
+class CBitmap;
+
 class CSurface
 {
 public:
@@ -11,17 +13,20 @@ public:
 	virtual bool CreateMainWnd(int width,int height, bool bWindow, HWND)=0;
 
         // 创建一个与主画面兼容的画面
-        virtual bool Create(int width, int height)=0;
+        virtual bool Create(const CSurface *mainSur, int width, int height)=0;
 
         // 释放画面资源
 	virtual void ShutDown()=0;
 
+        virtual bool LoadBitmap(const CBitmap &bmp, int surX, int surY, 
+                int bmpX, int bmpY, int width, int height)=0;
+
         // 创建一个与位图大小相同的画面，并加载位图
-        virtual bool CreateBitmap(const char *fileName)=0;
+        virtual bool CreateBitmapSur(const CSurface *mainSur, const char *fileName)=0;
 
         // 加载一个位图，从位图的指定位置(bmpX, bmpY)，加载指定的大小(width, height)
         // 到画面的指定位置(surX, surY)
-	virtual bool LoadBitmap(const char *fileName, int surX, int surY, 
+	virtual bool LoadBitmapFile(const char *fileName, int surX, int surY, 
                 int bmpX, int bmpY, int width, int height)=0;
 
         // 将另一个画面贴到该画面上

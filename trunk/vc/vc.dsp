@@ -183,6 +183,26 @@ SOURCE=..\src\LibGraphic\LibGraphic.h
 SOURCE=..\src\LibGraphic\Surface.h
 # End Source File
 # End Group
+# Begin Group "Script"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\src\Script\bitmap.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\Script\bitmap.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\Script\map.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\Script\map.h
+# End Source File
+# End Group
 # End Group
 # Begin Group "Resource Files"
 

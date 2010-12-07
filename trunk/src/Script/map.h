@@ -15,6 +15,10 @@
 // 另一方面，，触发器没有必要放到地图类中。
 // 设定好触发器所有的满足条件（进入区域，离开区域，跟NPC对话，杀死怪物等等等等)后，
 // 可以专门做一个trigger管理类
+
+class CSurface;
+class CLBitmap;
+
 typedef struct
 {
 	std::vector<void *>	v_trigger;
@@ -25,7 +29,8 @@ typedef struct
 	int			y2;
 }MAPSQUARE;
 
-
+#define MODE_CELL 1              
+#define MODE_ABS  0
 
 // 单件CMap类。用CMap::GetMap()取得地图单件。
 class CMap
@@ -39,8 +44,10 @@ public:
 
 public:
 
-	void Create(int width, int height);
+	bool Create(CSurface *mainSur, int width, int height, int cellWidth, int cellHeight);
 	void SetBackground(int x, int y, int x1, int y1, int x2, int y2, const char * filename);
+        
+        bool AddFrame(const CBitmap &bmp, int frameIndex, int x, int y, int mode);
 	
 	void AddTrigger(int x, int y, void * trigger_function);
 	
@@ -54,8 +61,14 @@ private:
 	
 	int		m_width;
 	int		m_height;
+        int             m_cellWidth;
+        int             m_cellHeight;
 
 	MAPSQUARE * m_square;
+
+        CSurface *m_mainSur;
+
+        std::vector<CSurface*> m_vSur;
 
 private:
 	bool CheckPos(int x, int y);
