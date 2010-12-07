@@ -8,6 +8,7 @@
 
 #include <windows.h>
 #include <vector>
+#include <map>
 
 
 // v_trigger这个数组可以存放某个位置的触发器。
@@ -44,12 +45,15 @@ public:
 
 public:
 
-	bool Create(CSurface *mainSur, int width, int height, int cellWidth, int cellHeight);
+	bool Create(CSurface *mainSur, int width, int height, int cellSize);
 	void SetBackground(int x, int y, int x1, int y1, int x2, int y2, const char * filename);
         
         bool AddFrame(const CBitmap &bmp, int frameIndex, int x, int y, int mode);
 	
 	void AddTrigger(int x, int y, void * trigger_function);
+
+        bool LoadMap(const char *fileName);
+        bool WriteMap(const char *fileName);
 	
 	MAPSQUARE * GetSqr(int x, int y);
 
@@ -61,14 +65,15 @@ private:
 	
 	int		m_width;
 	int		m_height;
-        int             m_cellWidth;
-        int             m_cellHeight;
+        int             m_cellSize;
 
 	MAPSQUARE * m_square;
 
         CSurface *m_mainSur;
 
+        char *m_mapInfo;
         std::vector<CSurface*> m_vSur;
+        std::map<int, CBitmap> m_mapBmp;
 
 private:
 	bool CheckPos(int x, int y);

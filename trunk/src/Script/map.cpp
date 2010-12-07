@@ -4,6 +4,11 @@
 #include "bitmap.h"
 #include "map.h"
 
+#include <fstream>
+#include <sstream>
+#include <string>
+using namespace std;
+
 
 CMap * CMap::m_map = NULL;
 
@@ -33,10 +38,10 @@ CMap * CMap::GetMap ()
 
 
 
-bool CMap::Create(CSurface *sur, int width, int height, int cellWidth, int cellHeight)
+bool CMap::Create(CSurface *sur, int width, int height, int cellSize)
 {
 	
-	if(width<=0 || height<=0 || cellWidth<=0 || cellHeight<=0)
+	if(width<=0 || height<=0 || cellSize<=0)
 	{
                 common::Error("地图尺寸不能为负值");
 		return false;
@@ -55,6 +60,7 @@ bool CMap::Create(CSurface *sur, int width, int height, int cellWidth, int cellH
 	m_square = (MAPSQUARE *)malloc(sizeof(MAPSQUARE) * width * height);
 	m_width = width;
 	m_height = height;
+        m_cellSize = cellSize;
         m_mainSur = sur;
 
         return true;
@@ -71,7 +77,7 @@ bool CMap::AddFrame(const CBitmap &bmp, int frameIndex, int x, int y, int mode)
 
         CSurface *tmpSur = new CDxSurface;
 
-        tmpSur->Create(m_mainSur, m_cellWidth, m_cellWidth);
+        tmpSur->Create(m_mainSur, m_cellSize, m_cellSize);
 
  
 
@@ -152,4 +158,26 @@ MAPSQUARE * CMap::GetSqr(int x, int y)
 	return m_square + offset;
 }
 
+bool CMap::WriteMap(const char *fileName)
+{
+        ofstream ofs(fileName);
+        if(!ofs)
+        {
+                return false;
+        }
+
+        ofs<<"<SIZE>"<<endl;
+        ofs<<m_width<<" "<<m_height<<" "<<m_cellSize>>endl;
+        ofs<<"<RES>"<<endl;
+        for(map<int, CBitmap>::iterator iter =0; iter != m_mapBmp.end(); iter++)
+        {
+                ofs<<"["<<iter->first<<"]"<<endl;
+                ofs<<iter->second.GetBuffer<<endl;
+        }
+        ofs<<"<MAPINFO>"<<endl;
+        ofs<<m_mapInfo<<endl;
+        ofs.close();
+
+        return true;
+}
 
