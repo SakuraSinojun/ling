@@ -10,6 +10,9 @@
 #include <vector>
 #include <map>
 
+#pragma warning (disable: 4514 4786)
+
+
 
 // v_trigger这个数组可以存放某个位置的触发器。
 // 当然，，可以加变量以区分触发器的种类。

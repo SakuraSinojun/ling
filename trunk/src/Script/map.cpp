@@ -167,12 +167,12 @@ bool CMap::WriteMap(const char *fileName)
         }
 
         ofs<<"<SIZE>"<<endl;
-        ofs<<m_width<<" "<<m_height<<" "<<m_cellSize>>endl;
+        ofs<<m_width<<" "<<m_height<<" "<<m_cellSize<<endl;
         ofs<<"<RES>"<<endl;
         for(map<int, CBitmap>::iterator iter =0; iter != m_mapBmp.end(); iter++)
         {
                 ofs<<"["<<iter->first<<"]"<<endl;
-                ofs<<iter->second.GetBuffer<<endl;
+                ofs<<iter->second.GetBuffer()<<endl;
         }
         ofs<<"<MAPINFO>"<<endl;
         ofs<<m_mapInfo<<endl;
