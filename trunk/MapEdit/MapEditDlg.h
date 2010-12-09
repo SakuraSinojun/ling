@@ -44,6 +44,7 @@ private:
         CDC m_dcMem;
         CDC m_dcView;
         CDC m_dcChoose;
+        CDC m_dcDef;
         int m_indexChoose;
 
     
@@ -83,6 +84,7 @@ private:
 // Dialog Data
 	//{{AFX_DATA(CMapEditDlg)
 	enum { IDD = IDD_DLG_MAPEDIT };
+	CComboBox	m_combo;
 	CScrollBar	m_barVer;
 	CScrollBar	m_barHor;
 	//}}AFX_DATA
@@ -111,6 +113,7 @@ protected:
 	afx_msg void OnLoadConfig();
 	afx_msg void OnLoadMap();
 	afx_msg void OnSaveMap();
+	afx_msg void OnSelchangeCombo();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
