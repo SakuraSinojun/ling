@@ -15,10 +15,10 @@ Class3=CMapEditView
 Class4=CMapEditDlg
 
 ResourceCount=4
-Resource1=IDD_ABOUTBOX
-Resource2=IDR_MAINFRAME
+Resource1=IDR_MAINFRAME
+Resource2=IDD_DLG_MAPEDIT
 Class5=CAboutDlg
-Resource3=IDD_DLG_MAPEDIT
+Resource3=IDD_ABOUTBOX
 Class6=CNewMapDlg
 Resource4=IDD_DLG_NEW
 
@@ -103,9 +103,10 @@ CommandCount=8
 [DLG:IDD_DLG_MAPEDIT]
 Type=1
 Class=CMapEditDlg
-ControlCount=2
+ControlCount=3
 Control1=IDC_BAR_HORIZON,scrollbar,1342177280
 Control2=IDC_BAR_VERTICAL,scrollbar,1342177281
+Control3=IDC_COMBO,combobox,1344340227
 
 [CLS:CMapEditDlg]
 Type=0
@@ -113,7 +114,7 @@ HeaderFile=MapEditDlg.h
 ImplementationFile=MapEditDlg.cpp
 BaseClass=CDialog
 Filter=W
-LastObject=ID_SAVEMAP
+LastObject=IDC_COMBO
 VirtualFilter=dWC
 
 [DLG:IDD_DLG_NEW]

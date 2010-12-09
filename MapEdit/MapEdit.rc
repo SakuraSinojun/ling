@@ -154,6 +154,8 @@ FONT 12, "System"
 BEGIN
     SCROLLBAR       IDC_BAR_HORIZON,23,167,214,9
     SCROLLBAR       IDC_BAR_VERTICAL,233,33,15,122,SBS_VERT
+    COMBOBOX        IDC_COMBO,256,22,37,54,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
 END
 
 IDD_DLG_NEW DIALOG DISCARDABLE  0, 0, 187, 94
@@ -257,6 +259,7 @@ END
 
 IDM_GRASS               BITMAP  DISCARDABLE     "res\\grass.bmp"
 IDM_BEGIN               BITMAP  DISCARDABLE     "res\\bitmap1.bmp"
+IDM_BLANK               BITMAP  DISCARDABLE     "res\\bmp00001.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //

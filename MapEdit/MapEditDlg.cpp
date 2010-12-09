@@ -35,6 +35,7 @@ void CMapEditDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CMapEditDlg)
+	DDX_Control(pDX, IDC_COMBO, m_combo);
 	DDX_Control(pDX, IDC_BAR_VERTICAL, m_barVer);
 	DDX_Control(pDX, IDC_BAR_HORIZON, m_barHor);
 	//}}AFX_DATA_MAP
@@ -53,6 +54,7 @@ BEGIN_MESSAGE_MAP(CMapEditDlg, CDialog)
 	ON_COMMAND(ID_LOAD_CONFIG, OnLoadConfig)
 	ON_COMMAND(ID_LOADMAP, OnLoadMap)
 	ON_COMMAND(ID_SAVEMAP, OnSaveMap)
+	ON_CBN_SELCHANGE(IDC_COMBO, OnSelchangeCombo)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -65,16 +67,15 @@ BOOL CMapEditDlg::OnInitDialog()
 
         // 窗口布局
         CRect	rcWnd;
+        // 主窗口
 	this->MoveWindow(0, 0, 800, 600);  
+        // 滚动条
         m_barHor.MoveWindow(0, GAME_WINDOW_HEIGHT, GAME_WINDOW_WIDTH, 20);  
         m_barVer.MoveWindow(GAME_WINDOW_WIDTH, 0, 20, GAME_WINDOW_HEIGHT);
-
         // 编辑区
         SetRect(&m_rcView, 0, 0, GAME_WINDOW_WIDTH, GAME_WINDOW_HEIGHT);
-
-        // 选择展示区
+        // 选择展示列表区
         SetRect(&m_rcIcon, 700, 50, 731, 450);
-
         // 创建静态文本框
         RECT rcStatic;
         int i=0;
@@ -84,9 +85,11 @@ BOOL CMapEditDlg::OnInitDialog()
                 m_stDis[i].Create("地图",WS_CHILD|WS_VISIBLE|SS_CENTER, rcStatic, this);
                 m_stDis[i].SetWindowText("未载入");
         }
+        // 组合框
+        m_combo.ShowWindow(SW_HIDE);
+        m_combo.MoveWindow(670, 5, 100, 20);
         
         // 各种DC
-
         CDC *dc = this->GetDC();
         HBITMAP hBitmap;
 
@@ -100,13 +103,27 @@ BOOL CMapEditDlg::OnInitDialog()
         DeleteObject(hBitmap);
 
         
-        // 创建DC列表
+        // 创建临时DC(跟随鼠标)
         hBitmap = CreateCompatibleBitmap(dc->m_hDC, 32, 32);
 
-        CDC *tempdc = new CDC;
         m_dcChoose.CreateCompatibleDC(dc);
         m_dcChoose.SelectObject(hBitmap);
+         DeleteObject(hBitmap);
+
+         hBitmap = ::LoadBitmap(AfxGetInstanceHandle(), MAKEINTRESOURCE(IDM_BLANK));
+        m_dcDef.CreateCompatibleDC(dc);
+        m_dcDef.SelectObject(hBitmap);
         DeleteObject(hBitmap);
+
+        for(i=0; i<8; i++)
+       {
+                m_dcMem.BitBlt(700, 50 + i*50, 32, 32, &m_dcDef, 0, 0, SRCCOPY); 
+       }
+
+
+       
+
+        //m_dcDef.FillSolidRect(0, 0, 32, 32, GetSysColor(COLOR_3DFACE));
 
 
         this->Invalidate();
@@ -127,7 +144,6 @@ BOOL CMapEditDlg::OnInitDialog()
         m_barPosHor = 0;
         m_barPosVer = 0;
 
-        SetTimer(1, 50, NULL);
 
 
         // TODO: Add extra initialization here
@@ -378,9 +394,9 @@ void CMapEditDlg::OnLButtonDown(UINT nFlags, CPoint point)
                 }
 
                 m_bChoose = true;
-                m_indexChoose = m_pInfo[n].index;
+                m_indexChoose = m_pInfo[n + 8 * m_listPage].index;
 
-                m_dcChoose.BitBlt(0, 0, 32, 32, m_pInfo[n].dc, 0, 0, SRCCOPY);               
+                m_dcChoose.BitBlt(0, 0, 32, 32, m_pInfo[n + 8 * m_listPage].dc, 0, 0, SRCCOPY);               
         }
 
 	CDialog::OnLButtonDown(nFlags, point);
@@ -512,7 +528,7 @@ void CMapEditDlg::LoadRes()
 {
      
 
-       int i=0;
+       int i=0; // 索引
        CDC *dc = this->GetDC();
 
        for(i=0; i<m_bmpNum; i++)
@@ -534,21 +550,37 @@ void CMapEditDlg::LoadRes()
                 m_pInfo[i].dc->SelectObject(m_pInfo[i].hBitmap);
        }
 
-       int end = 8;
-       if(m_bmpNum < end)
-               end = m_bmpNum;
+       if(m_bmpNum >8)
+       {
+               // 显示组合框
 
-       m_curListEnd = end;
+               int page = (int)(m_bmpNum/8);
+               CString temp;
+               for(i=0; i<=page; i++)
+               {
+                        temp.Format("列表 %d:", i+1);
+                        m_combo.AddString((LPTSTR)(LPCTSTR)temp);
+               }
+               m_combo.SetCurSel(0);
+               m_combo.ShowWindow(SW_SHOW);
+       }
 
+       // 设置当前列表的最后一个图标
+       m_curListEnd =  8;
+       if(m_bmpNum < m_curListEnd)
+               m_curListEnd = m_bmpNum;
 
-       for(i=0; i<end; i++)
+       // 设置当前所显示的列表
+       m_listPage = 0;
+
+        // 绘制当前列表
+       for(i=0; i<m_curListEnd; i++)
        {
                 m_dcMem.BitBlt(700, 50 + i*50, 32, 32, m_pInfo[i].dc, 0, 0, SRCCOPY);
                 m_stDis[i].SetWindowText((LPTSTR)(LPCTSTR)m_pInfo[i].name);
        }
 
        this->Invalidate();
-
        this->ReleaseDC(dc);
 
 
@@ -574,5 +606,32 @@ void CMapEditDlg::OnSaveMap()
                 
         }
 	// TODO: Add your command handler code here
+	
+}
+
+
+void CMapEditDlg::OnSelchangeCombo() 
+{
+	// TODO: Add your control notification handler code here
+        int cursel = m_combo.GetCurSel();
+        m_listPage = cursel;
+        m_curListEnd = m_bmpNum - 8*cursel;
+        if(m_curListEnd > 8)
+                m_curListEnd=8;
+        
+        int i = 0;
+        for(i=0; i<m_curListEnd; i++)
+        {
+                m_dcMem.BitBlt(700, 50 + i*50, 32, 32, m_pInfo[i+8*m_listPage].dc, 0, 0, SRCCOPY);
+                m_stDis[i].SetWindowText((LPTSTR)(LPCTSTR)m_pInfo[i+8*m_listPage].name);
+        }
+
+        for(i=m_curListEnd; i<8; i++)
+        {
+                m_dcMem.BitBlt(700, 50 + i*50, 32, 32, &m_dcDef, 0, 0, SRCCOPY);
+                m_stDis[i].SetWindowText("未载入");
+        }
+        
+        this->Invalidate();
 	
 }
