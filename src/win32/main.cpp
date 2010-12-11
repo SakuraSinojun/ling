@@ -12,12 +12,20 @@
 
 
 
-
+static HWND m_hWnd = NULL;
+static CRITICAL_SECTION  cs;
 
 BOOL OnIdle(LONG count);
 void CreateLingWindow(WNDPROC _lpfnWindowProc, int width, int height, bool onidle);
 
 
+//////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+HWND GetMainHwnd()
+{
+        return m_hWnd;
+}
 
 
 void CreateLingWindow(WNDPROC _lpfnWindowProc, int width, int height, bool onidle = false)
@@ -142,6 +150,11 @@ void OnPaint(HWND hWnd, HDC hdc)
 
 void OnCreate(HWND hWnd)
 {
+
+        InitializeCriticalSection(&cs);
+        m_hWnd = hWnd;
+
+
         CGame * game = CGame::Get();
         CRender * render = CRender::Get();
         

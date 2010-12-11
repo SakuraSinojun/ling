@@ -10,6 +10,9 @@
 #include <stdio.h>
 #include <windows.h>
 
+
+
+
 typedef enum GAME_STATE
 {
         ST_INIT = 0,
@@ -25,6 +28,9 @@ static DWORD	         lpThreadId = 0;
 static CRITICAL_SECTION  cs;
 
 
+HWND GetMainHwnd();
+
+
 
 DWORD WINAPI _game_thread(LPVOID lpParameter)
 {
@@ -37,6 +43,11 @@ DWORD WINAPI _game_thread(LPVOID lpParameter)
                         st = state;
                 LeaveCriticalSection(&cs);
                 
+                if(GetForegroundWindow() != GetMainHwnd())
+                {
+                        Sleep(500);
+                }
+
                 Input::ParseInput(input);
                 Mod::ParseInput (input);
                 //CHero::ParseInput(input, arg1, arg2, arg3, arg4);
