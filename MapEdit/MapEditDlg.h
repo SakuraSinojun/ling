@@ -10,8 +10,8 @@
 /////////////////////////////////////////////////////////////////////////////
 // CMapEditDlg dialog
 
-#include "../src/Script/map.h"
-#include "../src/common/parser.h"
+#include "map.h"
+#include "parser.h"
 
 #include <vector>
 #include <map>
@@ -52,7 +52,9 @@ public:
 
         BOOL SaveBmp(HBITMAP hBitmap, CString FileName);
 
-        BOOL SaveMyBmp(HBITMAP hBitmap, BMPINFO &bmp, int mapIndex, const char *name);
+        BOOL SaveMyBmp(HBITMAP hBitmap, SEGMENTHEAD &bmpHead, char* &buffer);
+
+        HBITMAP GetBmpFromBuffer(char *buffer);
 
         void ReleaseCellInfo();
 
@@ -128,7 +130,7 @@ private:
         RECT m_rcIcon;
 
         // 储存地图的索引
-        int *m_pMap;
+        DWORD *m_pMap;
 
         // 文本分析
         Parser m_parser;
