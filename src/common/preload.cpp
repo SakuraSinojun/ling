@@ -144,8 +144,11 @@ void _unload_all(void)
 
 ////////////////////////////////////////////////////////////////////////////////
 
+#ifdef __cplusplus
 namespace pl
 {
+#endif
+
 	void * load(const char * filename, unsigned int& len)
 	{
 		return _load_file(filename, len);
@@ -160,4 +163,15 @@ namespace pl
 	{
 		_unload_all();
 	}
+
+#ifdef __cplusplus
 }
+#endif
+
+
+
+
+
+
+
+
