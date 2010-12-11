@@ -1,6 +1,6 @@
 
 #include "../common/common.h"
-#include "../LibGraphic/LibGraphic.h"
+//#include "../LibGraphic/LibGraphic.h"
 #include "bitmap.h"
 #include "map.h"
 
