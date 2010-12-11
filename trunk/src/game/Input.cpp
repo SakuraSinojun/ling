@@ -29,7 +29,7 @@ namespace Input
                 bool    flag;
                 
 
-                if(!IsIconic(m_hWnd))
+                if(GetForegroundWindow() != m_hWnd)
                 {
                         memset(&wi, 0, sizeof(wi));
                         wi.input = INPUT_NONE;
