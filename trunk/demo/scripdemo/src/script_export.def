@@ -1,8 +1,0 @@
-LIBRARY
-
-EXPORTS
-	script_init
-	script_check
-	script_set_func
-	script_start
-
