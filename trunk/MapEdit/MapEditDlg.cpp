@@ -325,7 +325,7 @@ void CMapEditDlg::CreateNewMap(CString strName, int width, int height, int cellS
                 m_pMap = NULL;
         }
 
-        m_pMap = new int[width * height];
+        m_pMap = new DWORD[width * height];
         memset((char*)m_pMap, 0, sizeof(int)*width*height);
       
 
@@ -763,6 +763,8 @@ void CMapEditDlg::OnLoadMap()
         if(IDOK == dlg.DoModal())
         {
                 CString strPath = dlg.GetPathName();
+
+
                 if(!m_map.LoadMapFile((LPTSTR)(LPCTSTR)strPath))
                 {
                         MessageBox("加载文件失败");
@@ -770,7 +772,7 @@ void CMapEditDlg::OnLoadMap()
                 
                 ReleaseCellInfo();
                 
-                m_bmpNum = m_map.BitmapNum();
+                m_bmpNum = m_map.GetSegInfo().segNum;
                 
                 m_pInfo = new CellInfo[m_bmpNum];
 
@@ -779,10 +781,18 @@ void CMapEditDlg::OnLoadMap()
                 
                 for(int i=0; i<m_bmpNum; i++)
                 {
-                        m_pInfo[i].width = m_map.GetBitmap(i)->header.width;
-                        m_pInfo[i].height = m_map.GetBitmap(i)->header.height;
-                        m_pInfo[i].index = m_map.GetBitmap(i)->header.index;
-                        m_pInfo[i].name = m_map.GetBitmap(i)->header.name;
+                        m_pInfo[i].width = m_map.GetSegInfo().heads[i].width;
+                        m_pInfo[i].height = m_map.GetSegInfo().heads[i].height;
+                        m_pInfo[i].index = m_map.GetSegInfo().heads[i].index;
+                        m_pInfo[i].name = m_map.GetSegInfo().heads[i].name;
+
+
+                        HBITMAP hBitmap = GetBmpFromBuffer(m_map.GetSegInfo().buffer[i]);
+
+                        m_pInfo[i].dc = new CDC;
+
+                        m_pInfo[i].dc->CreateCompatibleDC(dc);
+                        m_pInfo[i].dc->SelectObject(&hBitmap);
                         
                         // BITMAPINFO bmi;
                         
@@ -849,7 +859,7 @@ void CMapEditDlg::OnLoadMap()
                         m_pInfo[i].hBitmap = hBitmap;
                         
                           //memcpy((char*)pBits, (char*)m_map.GetBitmap(i)->buffer, m_map.GetBitmap(i)->header.byteNum);
-                        */
+                        
                         CBitmap bmp;
                         
 
@@ -864,14 +874,11 @@ void CMapEditDlg::OnLoadMap()
                         m_pInfo[i].dc = new CDC;
 
                         m_pInfo[i].dc->CreateCompatibleDC(dc);
-                        m_pInfo[i].dc->SelectObject(&bmp);
-
-                        
-                        
-                       
+                        m_pInfo[i].dc->SelectObject(&bmp);  
+                        */
                 }
                 
-                
+                   
                 ReleaseDC(dc);
       
 
@@ -880,17 +887,65 @@ void CMapEditDlg::OnLoadMap()
 	
 }
 
+HBITMAP CMapEditDlg::GetBmpFromBuffer(char *buffer)
+{
+        HBITMAP                hBmp;
+        LPSTR                hDIB,lpBuffer = buffer;
+        LPVOID                lpDIBBits;
+        BITMAPFILEHEADER            bmfHeader;
+        DWORD                bmfHeaderLen;
+        
+        bmfHeaderLen = sizeof(bmfHeader);
+        strncpy((LPSTR)&bmfHeader,(LPSTR)lpBuffer,bmfHeaderLen);
+        if (bmfHeader.bfType != (*(WORD*)"BM")) return NULL;
+        hDIB = lpBuffer + bmfHeaderLen;
+        BITMAPINFOHEADER &bmiHeader = *(LPBITMAPINFOHEADER)hDIB ;
+        BITMAPINFO &bmInfo = *(LPBITMAPINFO)hDIB ;
+        
+        lpDIBBits=(lpBuffer)+((BITMAPFILEHEADER *)lpBuffer)->bfOffBits;
+        CClientDC dc(this);
+        hBmp = CreateDIBitmap(dc.m_hDC,&bmiHeader,CBM_INIT,lpDIBBits,&bmInfo,DIB_RGB_COLORS);
+        return hBmp;
+        
+}
 void CMapEditDlg::OnSaveMap() 
 {
          CFileDialog dlg(FALSE, "*.map",NULL,OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,"地图文件(*.map) | *.map"); 
         if(IDOK == dlg.DoModal())
         {
                 CString strPath = dlg.GetPathName();
+
+                /*
+                char *buffer = NULL;
+                
+                SEGMENTHEAD head;
+                SaveMyBmp(m_pInfo[1].hBitmap, head, buffer);
+
+                HBITMAP hBitmap = GetBmpFromBuffer(buffer);
+
+                HBITMAP old = (HBITMAP)m_pInfo[0].dc->SelectObject(hBitmap);
+                m_pInfo[0].width = 128;
+                m_pInfo[0].height = 32;
+               
+                DeleteObject(old);
+
+                this->Invalidate();
+
+                 */
+                
+
+
+
+                //this->SaveBmp(CopyDCToBitmap(m_dcMem.m_hDC, &m_rcView), strPath);
+
+                
+                // temp保存当前地图含有的元素的索引
+
                 int *temp = new int[m_mapWidth * m_mapHeight];
                 memset((char*)temp, 0, m_mapWidth * m_mapHeight * sizeof(int));
                 
                 temp[0] = m_pMap[0];
-                int t=1;
+                int t=1;        // 元素个数
                 
                 // 遍历所有的m_pMap数据，并挑选出所有的不重复的索引
                 int i=0, j=0;
@@ -914,9 +969,22 @@ void CMapEditDlg::OnSaveMap()
                         }
                 }
 
+                // 倒退一格
+
                 t--;
 
-                BMPINFO *bmp = new BMPINFO[t];
+                
+
+                SEGMENTHEAD *head = new SEGMENTHEAD[t];
+
+                char **buffer;
+
+                buffer = new char*[t];
+
+                for(i=0; i<t; i++)
+                {
+                        buffer[i] = NULL;
+                }
 
                 for(i=0; i<t; i++)
                 {
@@ -925,33 +993,55 @@ void CMapEditDlg::OnSaveMap()
                                 if(m_pInfo[j].index == temp[i])
                                 {
                                         // 找到了
-                                        SaveMyBmp(m_pInfo[j].hBitmap, bmp[i], m_pInfo[j].index,(LPTSTR)(LPCTSTR)m_pInfo[i].name);
+                                        strcpy(head[i].name, (LPTSTR)(LPCTSTR)m_pInfo[j].name);
+                                        head[i].index = m_pInfo[j].index;
+                                        head[i].width = m_pInfo[j].width;
+                                        head[i].height = m_pInfo[j].height;
+
+                                        SaveMyBmp(m_pInfo[j].hBitmap, head[i], buffer[i]);
 
                                 }
                         }
                 }
 
-                m_map.SaveMapFile((LPTSTR)(LPCTSTR)strPath, m_mapWidth, 
-                        m_mapHeight, m_mapCellSize, m_pMap, bmp, t);
+                SEGMENTINFO segInfo;
 
-                for(i=0; i<t; i++)
+                segInfo.segNum = t;
+                segInfo.heads = head;
+                segInfo.buffer = buffer;
+
+                MAPINFO mapInfo;
+                mapInfo.head.bmpNum = t;
+                mapInfo.head.cellSize = m_mapCellSize;
+                mapInfo.head.width = m_mapWidth;
+                mapInfo.head.height = m_mapHeight;
+                mapInfo.pData = m_pMap;
+
+                if(!m_map.SaveMapFile((LPTSTR)(LPCTSTR)strPath, mapInfo, segInfo))
                 {
-                        if(bmp[i].buffer)
-                        {
-                                delete[] bmp[i].buffer;
-                        }
+                        MessageBox("保存文件失败");
                 }
+                
+
+                if(buffer)
+                {
+                        for(i=0; i<t; i++)
+                        {
+                                if(buffer[i])
+                                {
+                                        delete[] buffer[i];
+                                }
+                        }
+                        delete[] buffer;
+                }
+                
 
                 if(temp)
                 {
 
                         delete[] temp; 
                 }
-
-                if(bmp)
-                {
-                        delete[] bmp;
-                }
+  
                 
                 /*
                 RECT rc = {0, 0, m_mapWidth * m_mapCellSize, m_mapHeight * m_mapCellSize};
@@ -1135,9 +1225,127 @@ BOOL CMapEditDlg::SaveBmp(HBITMAP hBitmap, CString FileName)
         return TRUE;
 }
 
-BOOL CMapEditDlg::SaveMyBmp(HBITMAP hBitmap, BMPINFO &bmp, int mapIndex, const char *name)
+BOOL CMapEditDlg::SaveMyBmp(HBITMAP hBitmap, SEGMENTHEAD &segHead, char* &buffer)
 {
+        if(hBitmap==NULL)        
+        {          
+                AfxMessageBox("参数错误");       
+                return false;           
+        }
+        
+        HDC hDC;
+        //当前分辨率下每象素所占字节数
+        int iBits;
+        //位图中每象素所占字节数
+        WORD wBitCount;
+        //定义调色板大小， 位图中像素字节大小 ，位图文件大小 ， 写入文件字节数 
+        DWORD dwPaletteSize=0, dwBmBitsSize=0, dwDIBSize=0, dwWritten=0; 
+        //位图属性结构 
+        BITMAP Bitmap;  
+        //位图文件头结构
+        BITMAPFILEHEADER bmfHdr;  
+        //位图信息头结构 
+        BITMAPINFOHEADER bi;  
+        //指向位图信息头结构  
+        LPBITMAPINFOHEADER lpbi;  
+        //定义文件，分配内存句柄，调色板句柄 
+        HANDLE hDib, hPal,hOldPal=NULL; 
+        
+        //计算位图文件每个像素所占字节数 
+        hDC = CreateDC("DISPLAY", NULL, NULL, NULL);
+        iBits = GetDeviceCaps(hDC, BITSPIXEL) * GetDeviceCaps(hDC, PLANES); 
+        DeleteDC(hDC); 
 
+    
+        if (iBits <= 1)  wBitCount = 1; 
+        else if (iBits <= 4)  wBitCount = 4; 
+        else if (iBits <= 8)  wBitCount = 8; 
+        else      wBitCount = 24; 
+      
+
+        GetObject(hBitmap, sizeof(Bitmap), (LPSTR)&Bitmap);
+        bi.biSize   = sizeof(BITMAPINFOHEADER);
+        bi.biWidth   = Bitmap.bmWidth;
+        bi.biHeight   = Bitmap.bmHeight;
+        bi.biPlanes   = 1;
+        bi.biBitCount  = wBitCount;
+        bi.biCompression = BI_RGB;
+        bi.biSizeImage  = 0;
+        bi.biXPelsPerMeter = 0;
+        bi.biYPelsPerMeter = 0;
+        bi.biClrImportant = 0;
+        bi.biClrUsed  = 0;
+        
+        dwBmBitsSize = ((Bitmap.bmWidth * wBitCount + 31) / 32) * 4 * Bitmap.bmHeight;
+
+        bi.biSizeImage = dwBmBitsSize;
+        
+        //为位图内容分配内存 
+        hDib = GlobalAlloc(GHND,dwBmBitsSize + dwPaletteSize + sizeof(BITMAPINFOHEADER)); 
+        lpbi = (LPBITMAPINFOHEADER)GlobalLock(hDib); 
+        *lpbi = bi;
+        
+        // 处理调色板  
+        hPal = GetStockObject(DEFAULT_PALETTE); 
+        if (hPal) 
+        { 
+                hDC = ::GetDC(NULL); 
+                hOldPal = ::SelectPalette(hDC, (HPALETTE)hPal, FALSE); 
+                RealizePalette(hDC); 
+        }
+        
+        // 获取该调色板下新的像素值 
+        GetDIBits(hDC, hBitmap, 0, (UINT) Bitmap.bmHeight, (LPSTR)lpbi + sizeof(BITMAPINFOHEADER) 
+                +dwPaletteSize, (BITMAPINFO *)lpbi, DIB_RGB_COLORS); 
+        
+        //恢复调色板  
+        if (hOldPal) 
+        { 
+                ::SelectPalette(hDC, (HPALETTE)hOldPal, TRUE); 
+                RealizePalette(hDC); 
+                ::ReleaseDC(NULL, hDC); 
+        }
+        
+       
+        
+        // 设置位图文件头 
+        bmfHdr.bfType = 0x4D42; // "BM" 
+        dwDIBSize = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) + dwPaletteSize + dwBmBitsSize;  
+        bmfHdr.bfSize = dwDIBSize; 
+        bmfHdr.bfReserved1 = 0; 
+        bmfHdr.bfReserved2 = 0; 
+        bmfHdr.bfOffBits = (DWORD)sizeof(BITMAPFILEHEADER) + (DWORD)sizeof(BITMAPINFOHEADER) + dwPaletteSize; 
+
+        // 设置结构体信息
+        segHead.byteNum = dwDIBSize;
+        segHead.bpp = bi.biBitCount;
+
+        if(buffer)
+        {
+                delete[] buffer;
+        }
+
+        buffer = new char[dwDIBSize];
+
+        memcpy((char*)buffer, (char*)&bmfHdr, sizeof(BITMAPFILEHEADER));
+        memcpy((char*)(buffer + sizeof(BITMAPFILEHEADER)), (char*)lpbi, dwDIBSize - sizeof(BITMAPFILEHEADER));
+
+
+
+        /*
+        // 写入位图文件头 
+        WriteFile(fh, (LPSTR)&bmfHdr, sizeof(BITMAPFILEHEADER), &dwWritten, NULL); 
+        // 写入位图文件其余内容 
+        WriteFile(fh, (LPSTR)lpbi, dwDIBSize, &dwWritten, NULL); 
+
+  */
+
+        //清除  
+        GlobalUnlock(hDib); 
+        GlobalFree(hDib); 
+     
+
+        /*
         if(hBitmap==NULL)        
         {          
                 AfxMessageBox("参数错误");       
@@ -1171,7 +1379,9 @@ BOOL CMapEditDlg::SaveMyBmp(HBITMAP hBitmap, BMPINFO &bmp, int mapIndex, const c
         else if (iBits <= 4)  wBitCount = 4; 
         else if (iBits <= 8)  wBitCount = 8; 
         else      wBitCount = 24; 
-        */
+        
+
+
         
         wBitCount = 24;
 
@@ -1226,10 +1436,11 @@ BOOL CMapEditDlg::SaveMyBmp(HBITMAP hBitmap, BMPINFO &bmp, int mapIndex, const c
                 RealizePalette(hDC); 
                 ::ReleaseDC(NULL, hDC); 
         }
-
-        
+  
         //清除  
         GlobalUnlock(hDib); 
         GlobalFree(hDib); 
+        */
+
         return TRUE;
 }
