@@ -260,10 +260,10 @@ static void _parse_to_bmp(const char * filename, PIC_TYPE type, BYTE ** buffer, 
 
 
 
-
+#ifdef __cplusplus
 namespace res
 {
-	
+#endif
 	
 
 	void * loadimg(const char * filename, BMPINFOHEADER * info)
@@ -298,8 +298,10 @@ namespace res
 
 		return buffer + l;
 	}
-}
 
+#ifdef __cplusplus
+}
+#endif
 
 
 

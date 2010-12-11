@@ -10,8 +10,11 @@
 #include <stdarg.h>	
 #include <string.h>
 
+#ifdef __cplusplus
 namespace common
 {
+#endif
+
         void Error(const char * string, ...)
         {
 		FILE * fp;
@@ -35,6 +38,6 @@ namespace common
 		printf(buffer); 
 
         }
-        
+#ifdef __cplusplus  
 }
-
+#endif
