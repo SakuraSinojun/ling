@@ -172,8 +172,8 @@ void OnCreate(HWND hWnd)
                 MessageBox(hWnd, "无法附加到窗口。", "错误", MB_OK);
                 exit(1);
         }
-        render->Start();
-        game->Run();
+        //render->Start();
+        //game->Run();
         
         Mod::LoadMod (".\\Mod");
         Mod::ShowMainMenu (hWnd);
@@ -181,7 +181,7 @@ void OnCreate(HWND hWnd)
 }
 
 void OnClose()
-{
+{       
         CGame * game = CGame::Get();
         CRender * render = CRender::Get();
         
