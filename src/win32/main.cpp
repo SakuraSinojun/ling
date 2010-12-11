@@ -1,7 +1,9 @@
 
 
-#include "common/common.h"
-#include "render.h"
+#include "../common/common.h"
+#include "../game/render.h"
+#include "../game/game.h"
+
 
 #include <windows.h>
 #include <stdio.h>
@@ -111,15 +113,43 @@ BOOL OnIdle(LONG count)
 
 void OnCreate(HWND hWnd)
 {
+        CGame * game = CGame::Get();
+        CRender * render = CRender::GetRender();
+        
+        if(!render->InitRender("glrender.dll"))
+        {
+                common::Error("no render dll...");
+                MessageBox(hWnd, "找不到渲染引擎。", "错误", MB_OK);
+                exit(1);
+        }
+        if(!render->Attach(hWnd))
+        {
+                common::Error("无法附加到窗口。");
+                MessageBox(hWnd, "无法附加到窗口。", "错误", MB_OK);
+                exit(1);
+        }
+        render->Start();
+        game->Run();
+        
 }
 
+void OnClose()
+{
+        CGame * game = CGame::Get();
+        CRender * render = CRender::GetRender();
+        
+        game->Stop();
+        render->Stop();
+        render->Detach();
+        
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 
 LRESULT CALLBACK _WndProc(HWND hwnd, UINT uMsg, WPARAM wParam,LPARAM lParam) 
 { 
 
-	PAINTSTRUCT 	ps;
+	//PAINTSTRUCT 	ps;
 	
 	switch(uMsg) 
 	{
@@ -127,6 +157,7 @@ LRESULT CALLBACK _WndProc(HWND hwnd, UINT uMsg, WPARAM wParam,LPARAM lParam)
 		OnCreate(hwnd);
 		break;
 	case WM_CLOSE:
+                OnClose();
 		PostQuitMessage (0);
 		break;
 	case WM_DESTROY:
@@ -141,7 +172,7 @@ LRESULT CALLBACK _WndProc(HWND hwnd, UINT uMsg, WPARAM wParam,LPARAM lParam)
 
 int main(int argc, char ** argv)
 {
-	CreateLingWindow(_WndProc, 800, 600, true);
+	CreateLingWindow(_WndProc, 800, 600, false);
 	return 0;
 }
 
