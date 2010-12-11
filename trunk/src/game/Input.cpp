@@ -4,52 +4,53 @@
 
 
 #include "input.h"
+#include "mod.h"
 
 #include <windows.h>
 
 
-#ifdef __cplusplus
 namespace Input
 {
-#endif
 
-        typedef enum
+        static HWND     m_hWnd = NULL;
+
+        void    AtachInput(HWND hWnd)
         {
-                WI_NONE         = 0,
-                WI_LBUTTONDOWN,
-                WI_RBUTTONDOWN,
-                WI_WHEELUP,
-                WI_WHEELDOWN,
-                WI_KEYUP,
-                WI_KEYDOWN,
-        }WI_INPUT;
-       
-        static struct
-        {
-                int             x;
-                int             y;
-                int             key[256];
-        }wi;
+                m_hWnd = hWnd;
+        }
 
-
-
-        void    GetAsyncInput()
+        void    GetAsyncInput(INPUT_STRUCT& wi)
         {
                 POINT   point;
                 int     i;
                 short   k;
                 short   test;
-                
+                bool    flag;
+
                 GetCursorPos(&point);
+                ScreenToClient(m_hWnd, &point);
+
                 wi.x = point.x;
                 wi.y = point.y;
                 
+                flag = false;
                 for(i=1; i<255; i++)
                 {
                         k = GetAsyncKeyState(i);
                         test = k >> 15;
                         test = test & 0x1;
-                        wi.key[i] = test;                        
+                        k = k & 0x1;
+                        if(k)
+                        {
+                                flag = true;
+                        }
+                        wi.key[i] = test;
+                }
+                if(!flag)
+                {
+                        wi.input = INPUT_NONE;
+                }else{
+                        wi.input = INPUT_NEWINPUT;
                 }
         }
 
@@ -57,15 +58,15 @@ namespace Input
         
         void    ParseInput(INPUT_STRUCT& input)
         {
-        
+                GetAsyncInput(input);
+
         }
         
         
         
 
-#ifdef __cplusplus
 }
-#endif
+
 
 
 

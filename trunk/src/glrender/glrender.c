@@ -29,6 +29,8 @@ static enum GAME_STATE m_State = ST_INIT;
 static HANDLE	hThread = NULL;
 static DWORD	lpThreadId = 0; 
 static CRITICAL_SECTION	cs;
+static HANDLE   hEvent = NULL;
+
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -68,15 +70,15 @@ void _render_error(const char * string, ...)
 void _render_calcFPS()
 {
 		
-	LARGE_INTEGER 		litmp;
-	LONGLONG 		qt1;
-	static LONGLONG	qt2 = 0;
-	double 		dft;
-	double			dff;
-	double			dfm;
-	char			FPS[100];
-	static LONGLONG	framecount=0;
-	double 		fps;
+	LARGE_INTEGER           litmp;
+	LONGLONG                qt1;
+	static LONGLONG         qt2 = 0;
+	double                  dft;
+	double                  dff;
+	double                  dfm;
+	char                    FPS[100];
+	static LONGLONG         framecount=0;
+	double                  fps;
 	
 	QueryPerformanceFrequency(&litmp);
 	dff = (double)litmp.QuadPart;
@@ -112,7 +114,8 @@ DWORD WINAPI _render_thread(LPVOID lpParameter)
 	enum GAME_STATE s;
 	RECT	orc;
 	RECT	rect;
-	
+	BOOL    flag;
+
 	memset(&orc, 0, sizeof(RECT));
 	
 	/////////////////////////////////////////////////////
@@ -138,7 +141,6 @@ DWORD WINAPI _render_thread(LPVOID lpParameter)
 			s = m_State;
 		LeaveCriticalSection(&cs);
 
-		_render_calcFPS();
 		switch (s)
 		{
 		case ST_RUN:
@@ -151,6 +153,7 @@ DWORD WINAPI _render_thread(LPVOID lpParameter)
 				Sleep(100);
 				break;
 			}
+                        _render_calcFPS();
 			GetClientRect(m_hWnd, &rect);
 			if(rect.right-rect.left != orc.right-orc.left || rect.bottom-rect.top != orc.bottom-orc.top)
 			{
@@ -163,11 +166,38 @@ DWORD WINAPI _render_thread(LPVOID lpParameter)
 			Sleep(0);
 			break;
 		case ST_STOP:
-			hThread = NULL;
-			lpThreadId = 0;
-			return 0;
-		case ST_INIT:
-		case ST_PAUSE:
+                        flag = TRUE;
+	                if(!wglMakeCurrent(m_hDC, NULL))
+	                {
+		                _render_error("释放DC或RC失败！");
+		                flag = FALSE;
+	                }
+	                
+	                if(!wglDeleteContext(m_hRC))
+	                {
+		                _render_error("释放RC失败!");
+		                flag = FALSE;
+	                }
+	                m_hRC = NULL;
+
+	                if(!ReleaseDC(m_hWnd, m_hDC))
+	                {
+		                _render_error("释放DC失败!");
+		                flag = FALSE;
+	                }
+	                m_hDC = NULL;
+
+	               if(flag)
+                       {
+                               return 0;
+                       }else{
+                               return 1;
+                       }
+                case ST_PAUSE:
+                        PulseEvent(hEvent);
+                        Sleep(100);
+                        break;
+                case ST_INIT:
 		default:
 			Sleep(100);
 			break;
@@ -193,7 +223,7 @@ BOOL _render_create_thread()
 	}
 
 	InitializeCriticalSection(&cs);
-
+        hEvent = CreateEvent(&sa, FALSE, FALSE, "PauseEvent");
 
 	hThread = CreateThread(&sa, 0, 
 			_render_thread, NULL, 
@@ -265,43 +295,15 @@ BOOL render_attach(HWND hWnd)
 
 }
 
-BOOL render_detach()
-{
-	BOOL flag = TRUE;
-
-	WaitForSingleObject (hThread, 5000);
-
-	if(!wglMakeCurrent(m_hDC, NULL))
-	{
-		_render_error("释放DC或RC失败！");
-		flag = FALSE;
-	}
-	
-	if(!wglDeleteContext(m_hRC))
-	{
-		_render_error("释放RC失败!");
-		flag = FALSE;
-	}
-	m_hRC = NULL;
-
-	if(!ReleaseDC(m_hWnd, m_hDC))
-	{
-		_render_error("释放DC失败!");
-		flag = FALSE;
-	}
-	m_hDC = NULL;
-
-	return flag;
-
-}
-
 
 BOOL render_pause()
 {
 	EnterCriticalSection(&cs);
 		m_State = ST_PAUSE;
 	LeaveCriticalSection(&cs);
-	printf("pause\n");
+	printf("pause render\n");
+
+        WaitForSingleObject(hEvent, INFINITE);
 
 	return TRUE;
 
@@ -312,18 +314,30 @@ BOOL render_start()
 	EnterCriticalSection(&cs);
 		m_State = ST_RUN;
 	LeaveCriticalSection(&cs);
-	printf("resume\n");
+	printf("resume render\n");
 
 	return TRUE;
 }
 
 BOOL render_stop()
 {
+        if(hThread == NULL)
+        {
+                return TRUE;
+        }
+
 	EnterCriticalSection(&cs);
 		m_State = ST_STOP;
 	LeaveCriticalSection(&cs);
-	printf("stop\n");
-
+	printf("stop render\n");
+        
+        if(WaitForSingleObject (hThread, 5000) == WAIT_TIMEOUT)
+        {
+                _render_error("线程超时。强制结束。");
+                TerminateProcess (hThread, 1);
+        }
+        
+        CloseHandle(hEvent);
 	return TRUE;
 }
 
