@@ -69,7 +69,7 @@ BOOL CRender::InitRender(const char * strRenderDLLName)
 	void ** p;
 	int	i;
 	int	l;
-	
+
 	if(strRenderDLLName == NULL)
 	{
 		return FALSE;
@@ -152,7 +152,7 @@ bool CRender::file_exists(const char * file)
 
 BOOL	CRender::Attach(HWND hWnd)
 {
-	return ((LPFNRENDERATTACH)funs.render_attach)(hWnd);
+ 	return ((LPFNRENDERATTACH)funs.render_attach)(hWnd);
 }
 
 

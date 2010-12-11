@@ -119,7 +119,7 @@ DWORD WINAPI _render_thread(LPVOID lpParameter)
 	memset(&orc, 0, sizeof(RECT));
 	
 	/////////////////////////////////////////////////////
-	//这个东西不能放在主线程里。。。
+	//      这个东西不能放在主线程里。。。
 	//
 	m_hRC = wglCreateContext(m_hDC);
 	if(m_hRC == NULL)
@@ -308,7 +308,11 @@ BOOL render_pause()
 	EnterCriticalSection(&cs);
 		m_State = ST_PAUSE;
 	LeaveCriticalSection(&cs);
-	WaitForSingleObject(hEvent, INFINITE);
+	if(WaitForSingleObject(hEvent, 3000) == WAIT_TIMEOUT)
+        {
+                printf("暂停超时,可能是Event机制有问题.\n");
+        }
+
         ResetEvent(hEvent);
 
         printf("paused.\n");
@@ -462,7 +466,7 @@ void RenderScene(void)
 
 	glPopMatrix();
 	//glAccum(GL_RETURN, 1.0f);
-	glFlush();
+	//glFlush();
 	SwapBuffers(m_hDC);
 
 }
@@ -503,7 +507,7 @@ void ChangeSize(GLsizei w, GLsizei h)
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 
-	gluPerspective(45.0f, (GLfloat)w/(GLfloat)h, 1.0, 4000.0);
+	gluPerspective(45.0f, (GLfloat)w/(GLfloat)h, 1.0, 400.0);
 	
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
