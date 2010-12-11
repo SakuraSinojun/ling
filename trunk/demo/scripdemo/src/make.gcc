@@ -1,0 +1,58 @@
+
+
+CC = @gcc
+CXX = @g++
+LD = @g++
+
+CFLAGS = -c -O -Werror -Wall
+LDFLAGS = -LD:\MSYS\mingw\lib -lgdi32 -luser32 -lmsimg32 -lwinmm -Wl
+CCOUT = -o 
+LDOUT = -o 
+
+
+OBJS = 	ling.o \
+	datafile.o \
+	error.o \
+	preload.o \
+	game.o \
+	script.o \
+	action.o \
+	render.o \
+	map.o
+
+	
+TARGET = ../test.exe
+SCRIPT_DEMO = ../demo.dll
+
+all: $(TARGET) $(SCRIPT_DEMO) clean
+
+$(TARGET): $(OBJS)
+	@echo Linking $@ ...
+	$(LD) $(OBJS) $(LDFLAGS) $(LDOUT)$@
+	@echo --------------------------------------------------
+	
+$(SCRIPT_DEMO): script_demo.o
+	@echo Linking SCRIPT_DEMO ...
+	gcc $(LDFLAGS) script_demo.o $(LDOUT)$@ -shared
+	@echo --------------------------------------------
+	@echo done.
+	
+.cpp.o:
+	@echo Compling $< ...
+	$(CXX) $< $(CFLAGS) $(CCOUT)$@ 
+	@echo --------------------------------------------------
+	
+.c.o:
+	@echo Compling $< ...
+	$(CC) $< $(CFLAGS) $(CCOUT)$@ 
+	@echo --------------------------------------------------
+	
+rebuild: clean $(TARGET)
+
+
+.PHONY: clean
+
+clean:
+	del *.o
+
+
