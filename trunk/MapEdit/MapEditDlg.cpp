@@ -65,36 +65,52 @@ BOOL CMapEditDlg::OnInitDialog()
 {
         CDialog::OnInitDialog();
 
-        // 窗口布局
-        CRect	rcWnd;
-        // 主窗口
-	this->MoveWindow(0, 0, 800, 600);  
-        // 滚动条
-        m_barHor.MoveWindow(0, GAME_WINDOW_HEIGHT, GAME_WINDOW_WIDTH, 20);  
-        m_barVer.MoveWindow(GAME_WINDOW_WIDTH, 0, 20, GAME_WINDOW_HEIGHT);
-        // 编辑区
-        SetRect(&m_rcView, 0, 0, GAME_WINDOW_WIDTH, GAME_WINDOW_HEIGHT);
-        // 选择展示列表区
-        SetRect(&m_rcIcon, 700, 50, 731, 450);
-        // 创建静态文本框
-        RECT rcStatic;
-        int i=0;
-        for(i=0; i<8; i++)
-        {
-                SetRect(&rcStatic, 690, 82 + i*50, 741, 100 + i*50); 
-                m_stDis[i].Create("地图",WS_CHILD|WS_VISIBLE|SS_CENTER, rcStatic, this);
-                m_stDis[i].SetWindowText("未载入");
-        }
-        // 组合框
-        m_combo.ShowWindow(SW_HIDE);
-        m_combo.MoveWindow(670, 5, 100, 20);
+        m_width = 1000;
+        m_height = 700;
+
+        m_viewWidth = 800;
+        m_viewHeight = 600;
+
+        m_pMap = NULL;
+        m_bChoose = false;
+        m_listPage = 0;
+        m_indexChoose = 0;
+        m_pInfo = NULL;
+
         
-        // 各种DC
+        m_barPosHor = 0;
+        m_barPosVer = 0;
+
+        // 窗口布局
+
+        // 主窗口
+	this->MoveWindow(0, 0, m_width, m_height);  
+
+        // 滚动条
+        m_barHor.MoveWindow(0, m_viewHeight, m_viewWidth, 20);  
+        m_barVer.MoveWindow(m_viewWidth, 0, 20, m_viewHeight);
+
+        // 隐藏滚动条，如果地图大于默认屏幕尺寸，则显示滚动条，支持地图的滚动显示
+        m_barVer.ShowWindow(SW_HIDE);
+        m_barHor.ShowWindow(SW_HIDE);
+
+         // 组合框
+        m_combo.ShowWindow(SW_HIDE);
+        m_combo.MoveWindow(m_width - 120, 5, 100, 20);
+
+        // 编辑区
+        SetRect(&m_rcView, 0, 0, m_viewWidth, m_viewHeight);
+
+        // 鼠标文字区
+        SetRect(&m_rcText, 0, m_height-80, 300, m_height-60);
+
+         // 选择展示列表区
+        SetRect(&m_rcIcon, m_width-150, 50, m_width - 22, 680);
+
         CDC *dc = this->GetDC();
-        HBITMAP hBitmap;
 
         // 双缓冲DC
-        hBitmap = CreateCompatibleBitmap(dc->m_hDC, 800, 600);
+        HBITMAP hBitmap = CreateCompatibleBitmap(dc->m_hDC, m_width, m_height);
         m_dcMem.CreateCompatibleDC(dc);
         m_dcMem.SelectObject(hBitmap);
         RECT rc;
@@ -102,48 +118,34 @@ BOOL CMapEditDlg::OnInitDialog()
         m_dcMem.FillSolidRect(&rc, GetSysColor(COLOR_3DFACE));
         DeleteObject(hBitmap);
 
-        
-        // 创建临时DC(跟随鼠标)
-        hBitmap = CreateCompatibleBitmap(dc->m_hDC, 32, 32);
-
         m_dcChoose.CreateCompatibleDC(dc);
-        m_dcChoose.SelectObject(hBitmap);
-         DeleteObject(hBitmap);
-
-         hBitmap = ::LoadBitmap(AfxGetInstanceHandle(), MAKEINTRESOURCE(IDM_BLANK));
         m_dcDef.CreateCompatibleDC(dc);
-        m_dcDef.SelectObject(hBitmap);
-        DeleteObject(hBitmap);
-
-        for(i=0; i<8; i++)
-       {
-                m_dcMem.BitBlt(700, 50 + i*50, 32, 32, &m_dcDef, 0, 0, SRCCOPY); 
-       }
+        m_dcView.CreateCompatibleDC(dc);
 
 
-       
+        // 创建静态文本框
 
-        //m_dcDef.FillSolidRect(0, 0, 32, 32, GetSysColor(COLOR_3DFACE));
+        RECT rcStatic;
+        int i=0;
+        for(i=0; i<ICON_NUM; i++)
+        {
+                SetRect(&m_rcIcons[i], m_width - 124, 56  + i*90, m_width - 58, 120 + i*90);
+                SetRect(&rcStatic,     m_width - 160 ,125 + i*90, m_width - 20, 140 + i*90); 
+                m_stDis[i].Create("地图",WS_CHILD|WS_VISIBLE|SS_CENTER, rcStatic, this);
+        }
 
+        
+  
+
+        // 先默认加载一个地图
+        CreateNewMap("NewMap", 50, 50, 32);
+        InitList();
+        
 
         this->Invalidate();
         this->ReleaseDC(dc);
 
-        m_data = NULL;
-        m_bChoose = false;
-        m_listPage = 0;
-        m_indexChoose = 0;
-    
-
         
-
-        // 隐藏滚动条，如果地图大于默认屏幕尺寸，则显示滚动条，支持地图的滚动显示
-
-        m_barVer.ShowWindow(SW_HIDE);
-        m_barHor.ShowWindow(SW_HIDE);
-        m_barPosHor = 0;
-        m_barPosVer = 0;
-
 
 
         // TODO: Add extra initialization here
@@ -152,6 +154,124 @@ BOOL CMapEditDlg::OnInitDialog()
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
 
+void CMapEditDlg::ReleaseCellInfo()
+{
+        if(m_pInfo)
+        {
+                for(int i=0; i<m_bmpNum; i++)
+                {
+                        DeleteObject(m_pInfo[i].hBitmap);
+                        if(m_pInfo[i].dc)
+                        {
+                                ReleaseDC(m_pInfo[i].dc);
+                                delete m_pInfo[i].dc;
+                        }             
+                }
+
+                delete[] m_pInfo;
+                m_bmpNum = 0;
+                m_curListEnd = 0;
+                m_listPage = 0;
+
+                InitList();
+        }
+}
+
+void CMapEditDlg::InitList()
+{
+        HBITMAP hBitmap = ::LoadBitmap(AfxGetInstanceHandle(), MAKEINTRESOURCE(IDM_BLANK));
+        m_dcDef.SelectObject(hBitmap);
+        DeleteObject(hBitmap);
+
+        for(int i=0; i<ICON_NUM; i++)
+        {
+                m_dcMem.BitBlt(m_rcIcons[i].left, m_rcIcons[i].top, 
+                        m_rcIcons[i].right - m_rcIcons[i].left, 
+                        m_rcIcons[i].bottom - m_rcIcons[i].top, 
+                        &m_dcDef, 0, 0, SRCCOPY); 
+
+              
+                m_stDis[i].SetWindowText("未载入");
+
+        }
+
+   
+        
+        // 创建默认空白图标
+}
+
+void CMapEditDlg::UpdateIconList()
+{
+        // 设置当前列表的最后一个图标
+        m_curListEnd =  m_bmpNum - ICON_NUM * m_listPage;
+        if(m_curListEnd > ICON_NUM)
+                m_curListEnd = ICON_NUM;
+        
+        // 设置当前所显示的列表
+        
+        
+        // 绘制当前列表
+        int i=0;
+
+        for(i=0; i<ICON_NUM; i++)
+        {
+                m_dcMem.BitBlt(m_rcIcons[i].left, m_rcIcons[i].top, 
+                        m_rcIcons[i].right - m_rcIcons[i].left, 
+                        m_rcIcons[i].bottom - m_rcIcons[i].top, 
+                        &m_dcDef, 0, 0, SRCCOPY); 
+                m_stDis[i].SetWindowText("未载入");
+        }
+
+        for(i=0; i<m_curListEnd; i++)
+        {
+                int index = i + ICON_NUM * m_listPage;
+
+                int width = m_pInfo[index].width;
+                int height = m_pInfo[index].height;
+                
+                int bigger = (width > height) ? width : height;
+                float scale = 64.0 / (float)bigger;
+                
+                int left = m_rcIcons[i].left;
+                int top = m_rcIcons[i].top;
+                
+                int newWidth = m_rcIcons[i].right - left;
+                
+                int newHeight = m_rcIcons[i].bottom - top;
+                
+                if(scale < 1.0f)
+                {
+                        // 需要缩放
+                        newWidth  = (int)(width*scale);
+                        newHeight = (int)(height*scale);
+                        
+                        if(newWidth < 63)
+                        {
+                                left = left + 32 - (int)(32.0f* newWidth / 64.0f);
+                        }
+                        if(newHeight < 63)
+                        {
+                                top = top + 32 - (int)(32.0f * newHeight / 64.0f);
+                        }
+                }
+                else
+                {
+                        left = left + 32 - (int)(width / 64.0f * 32.0f);
+                        top  = top  + 32 - (int)(height/64.0f * 32.0f);
+                }
+                m_dcMem.BitBlt(left, top, 
+                        newWidth, 
+                        newHeight, 
+                        m_pInfo[index].dc, 0, 0, SRCCOPY);
+                
+                m_stDis[i].SetWindowText((LPTSTR)(LPCTSTR)m_pInfo[index].name);
+        }
+        
+        
+
+       this->InvalidateRect(&m_rcIcon);
+        
+}
 
 void CMapEditDlg::OnFileNew() 
 {
@@ -176,43 +296,43 @@ void CMapEditDlg::CreateNewMap(CString strName, int width, int height, int cellS
         m_mapCellSize = cellSize;
         m_mapName = strName;
 
-        //HBITMAP hBitmap = CreateCompatibleBitmap(m_memdc.m_hDC, width*cellSize, height*cellSize);
-        
         CDC *dc = this->GetDC();
-        m_dcView.CreateCompatibleDC(dc);
-        //HBITMAP hBitmap = (HBITMAP)::LoadImage(AfxGetInstanceHandle(), "..//MapEdit//huancai207.bmp",IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE );
         HBITMAP hBitmap = CreateCompatibleBitmap(dc->m_hDC, width*cellSize, height*cellSize);
         m_dcView.SelectObject(hBitmap);
         DeleteObject(hBitmap);
+        this->ReleaseDC(dc);
 
-        m_rangeHor = width  -  GAME_WINDOW_WIDTH/cellSize;
-        m_rangeVer = height - GAME_WINDOW_HEIGHT/cellSize;
+        m_rangeHor = width  -  (int)(m_viewWidth/cellSize  + 0.5f);
+        m_rangeVer = height -  (int)(m_viewHeight/cellSize + 0.5f);
 
         if(m_rangeHor>0)
         {
                 m_barPosHor = 0;
-                m_barVer.SetScrollRange(0, m_rangeHor);
-                m_barVer.ShowWindow(SW_SHOW);
+                m_barHor.SetScrollRange(0, m_rangeHor);
+                m_barHor.ShowWindow(SW_SHOW);
         }
-        if(height*cellSize > 480)
+        if(m_rangeVer>0)
         {       
                 m_barPosVer = 0;
-                m_barHor.SetScrollRange(0, m_rangeVer);
-                m_barHor.ShowWindow(SW_SHOW);
+                m_barVer.SetScrollRange(0, m_rangeVer-1);
+                m_barVer.ShowWindow(SW_SHOW);
         }
 
         // 初始化数据索引区
-        m_data = new int[width * height];
-        memset((char*)m_data, 0, sizeof(int)*width*height);
+        if(m_pMap)
+        {
+                delete[] m_pMap;
+                m_pMap = NULL;
+        }
+
+        m_pMap = new int[width * height];
+        memset((char*)m_pMap, 0, sizeof(int)*width*height);
       
 
         
-        m_dcMem.BitBlt(0, 0, 640, 480, &m_dcView, 0, 0, SRCCOPY);
+        m_dcMem.BitBlt(0, 0, m_viewWidth, m_viewHeight, &m_dcView, 0, 0, SRCCOPY);
 
         this->Invalidate();
-        this->ReleaseDC(dc);
-
-
 }
 
 void CMapEditDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) 
@@ -299,24 +419,28 @@ void CMapEditDlg::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 
 	CDialog::OnVScroll(nSBCode, nPos, pScrollBar);
 }
-
+void CMapEditDlg::ClientToMap(POINT &pt)
+{
+        pt.x =  (m_barPosHor + (int)(pt.x/m_mapCellSize));
+        pt.y =  (m_barPosVer + (int)(pt.y/m_mapCellSize));
+}
 void CMapEditDlg::OnMouseMove(UINT nFlags, CPoint point) 
 {
 	// TODO: Add your message handler code here and/or call default
 
         if(PtInRect(&m_rcView, point))
         {
-                int x = m_mapCellSize * (m_barPosHor + (int)(point.x/m_mapCellSize));
-                int y = m_mapCellSize * (m_barPosVer + (int)(point.y/m_mapCellSize));
+                //int x = m_mapCellSize * (m_barPosHor + (int)(point.x/m_mapCellSize));
+                //int y = m_mapCellSize * (m_barPosVer + (int)(point.y/m_mapCellSize));
+
+                ClientToMap(point);
 
                 CString str;
-                str.Format("[%d], [%d]", x, y);
-
-                RECT rc = {0, 500, 100, 520};
+                str.Format("地图坐标：[%d], [%d]", point.x, point.y);
 
                 CDC *dc = this->GetDC();
-                dc->FillSolidRect(&rc, GetSysColor(COLOR_3DFACE));
-                dc->DrawText(str, &rc, DT_LEFT);
+                dc->FillSolidRect(&m_rcText, GetSysColor(COLOR_3DFACE));
+                dc->DrawText(str, &m_rcText, DT_LEFT);
                 this->ReleaseDC(dc);
 
         }
@@ -347,27 +471,33 @@ void CMapEditDlg::OnLButtonDown(UINT nFlags, CPoint point)
                         return;
                 }
 
-                int xSeg = m_barPosHor + (int)(point.x/m_mapCellSize);
-                int ySeg = m_barPosVer + (int)(point.y/m_mapCellSize);
-           
-                int x = m_mapCellSize * xSeg;
-                int y = m_mapCellSize * ySeg;
+                ClientToMap(point);
 
-                
-                m_dcView.BitBlt(x, y, m_mapCellSize, m_mapCellSize, &m_dcChoose, 0, 0, SRCCOPY);
+                m_dcView.BitBlt(point.x * m_mapCellSize, point.y * m_mapCellSize, 
+                        m_curWidth, m_curHeight, &m_dcChoose, 0, 0, SRCCOPY);
 
-                m_data[xSeg + ySeg * m_mapWidth] = m_indexChoose;
-
-
-                //this->Invalidate();
-
-                
-             
+                m_pMap[point.x + point.y * m_mapWidth] = m_indexChoose;
         }
         else if(PtInRect(&m_rcIcon, point))
         {
                 // 点中了地图图标区域
 
+                int i=0;
+                for(i=0; i<ICON_NUM; i++)
+                {
+                        if(PtInRect(&m_rcIcons[i], point))
+                        {
+                                break;
+                        }
+                }
+
+                if(i == ICON_NUM)
+                {
+                        // 没有选中相应地图
+                        return;
+                }
+
+                /*
                 int xDiff = point.x - m_rcIcon.left;
 
                 if(xDiff <9 || xDiff > 41)
@@ -385,21 +515,37 @@ void CMapEditDlg::OnLButtonDown(UINT nFlags, CPoint point)
                 }
 
                 int n = (int)(yDiff / 50);
+                */
 
                
 
-                if(n > m_curListEnd)
+                if(i > m_curListEnd)
                 {
+                        // 此区域空白
+
                         return;
                 }
 
                 m_bChoose = true;
-                m_indexChoose = m_pInfo[n + 8 * m_listPage].index;
 
-                m_dcChoose.BitBlt(0, 0, 32, 32, m_pInfo[n + 8 * m_listPage].dc, 0, 0, SRCCOPY);               
+                CellInfo *curCell = &m_pInfo[i + ICON_NUM * m_listPage];
+
+                m_curWidth = curCell->width;
+                m_curHeight = curCell->height;
+
+                // 创建临时DC(跟随鼠标)
+                CDC *dc = this->GetDC();
+                HBITMAP hBitmap = CreateCompatibleBitmap(dc->m_hDC, m_curWidth, m_curHeight);
+                m_dcChoose.SelectObject(hBitmap);
+                DeleteObject(hBitmap);
+                this->ReleaseDC(dc);
+
+                m_indexChoose = curCell->index;
+                
+                m_dcChoose.BitBlt(0, 0, m_curWidth, m_curHeight, curCell->dc, 0, 0, SRCCOPY);               
         }
-
-	CDialog::OnLButtonDown(nFlags, point);
+        
+        CDialog::OnLButtonDown(nFlags, point);
 }
 
 BOOL CMapEditDlg::OnEraseBkgnd(CDC* pDC) 
@@ -407,30 +553,56 @@ BOOL CMapEditDlg::OnEraseBkgnd(CDC* pDC)
 	// TODO: Add your message handler code here and/or call default
         
 
-	m_dcMem.BitBlt(0, 0, 640, 480, &m_dcView, m_barPosHor*m_mapCellSize, m_barPosVer*m_mapCellSize, SRCCOPY);
+        // 先把地图画在缓冲上
+	m_dcMem.BitBlt(0, 0, m_viewWidth, m_viewHeight, &m_dcView, m_barPosHor*m_mapCellSize, m_barPosVer*m_mapCellSize, SRCCOPY);
+
         if(m_bChoose)
         {
+                // 选择了某个图标
+
                 POINT pt;
                 GetCursorPos(&pt);
                 this->ScreenToClient(&pt); 
                 if(PtInRect(&m_rcView, pt))
                 {
-                        m_dcMem.BitBlt(pt.x-16, pt.y-16, 800, 600, &m_dcChoose, 0, 0, SRCCOPY);
+                        // 对矩形进行剪裁
+                        // 如果边界超过了左边或上边的区域，则x,y值为零
+                        // 如果边界超过了右边的区域，则在显示时，将它剪裁掉
+
+                        int width = m_curWidth;
+                        int height = m_curHeight;
+
+                        int x = m_mapCellSize*(int)(pt.x / m_mapCellSize);
+                        int y = m_mapCellSize*(int)(pt.y / m_mapCellSize);
+                       
+                        if(x + m_curWidth > m_rcView.right)
+                        {
+                                width = m_rcView.right - x;
+                        }
+
+                        if(y + m_curHeight > m_rcView.bottom)
+                        {
+                                height = m_rcView.bottom - y;
+                        }
+                     
+                        // 将图标的临时位置显示先缓冲画面上
+
+                        m_dcMem.BitBlt(x, y, width, height, &m_dcChoose, 0, 0, SRCCOPY);
                 }
         }
 
         if(!pDC->IsPrinting())
         {
-                pDC->BitBlt(0, 0, 800, 600, &m_dcMem, 0, 0, SRCCOPY);
+                pDC->BitBlt(0, 0, m_width, m_height, &m_dcMem, 0, 0, SRCCOPY);
         }
         return TRUE;
-	return CDialog::OnEraseBkgnd(pDC);
 }
 
 void CMapEditDlg::OnRButtonDown(UINT nFlags, CPoint point) 
 {
 	// TODO: Add your message handler code here and/or call default
 	m_bChoose = FALSE;
+        this->InvalidateRect(&m_rcView);
 	CDialog::OnRButtonDown(nFlags, point);
 }
 
@@ -492,7 +664,13 @@ void CMapEditDlg::OnLoadConfig()
                 }
 
                 m_bmpNum = m_parser.vints[0];
-                m_pInfo = new MapInfo[m_bmpNum];
+
+                if(m_pInfo)
+                {
+                        delete[] m_pInfo;
+                }
+
+                m_pInfo = new CellInfo[m_bmpNum];
 
                 if(!m_parser.GetLine(PARSER_STRIP_EMPTY_LINES|PARSER_STRIP_COMMENTS))
                 {
@@ -508,11 +686,12 @@ void CMapEditDlg::OnLoadConfig()
 
            
                 for(i=0; i<m_bmpNum; i++)
-                {                  
+                {      
+                        m_pInfo[i].width    = m_parser.GetInt();
+                        m_pInfo[i].height   = m_parser.GetInt();
                         m_pInfo[i].name     = m_parser.GetString();
                         m_pInfo[i].index    = m_parser.GetInt();   
                         m_pInfo[i].fileName = m_parser.GetString();
-
                 }
 
                 m_parser.Close();
@@ -550,11 +729,11 @@ void CMapEditDlg::LoadRes()
                 m_pInfo[i].dc->SelectObject(m_pInfo[i].hBitmap);
        }
 
-       if(m_bmpNum >8)
+       if(m_bmpNum >ICON_NUM)
        {
                // 显示组合框
 
-               int page = (int)(m_bmpNum/8);
+               int page = (int)(m_bmpNum/ICON_NUM);
                CString temp;
                for(i=0; i<=page; i++)
                {
@@ -565,23 +744,13 @@ void CMapEditDlg::LoadRes()
                m_combo.ShowWindow(SW_SHOW);
        }
 
-       // 设置当前列表的最后一个图标
-       m_curListEnd =  8;
-       if(m_bmpNum < m_curListEnd)
-               m_curListEnd = m_bmpNum;
-
-       // 设置当前所显示的列表
        m_listPage = 0;
-
-        // 绘制当前列表
-       for(i=0; i<m_curListEnd; i++)
-       {
-                m_dcMem.BitBlt(700, 50 + i*50, 32, 32, m_pInfo[i].dc, 0, 0, SRCCOPY);
-                m_stDis[i].SetWindowText((LPTSTR)(LPCTSTR)m_pInfo[i].name);
-       }
-
-       this->Invalidate();
+       
        this->ReleaseDC(dc);
+
+       this->UpdateIconList();
+       
+       
 
 
 }
@@ -589,11 +758,124 @@ void CMapEditDlg::LoadRes()
 
 void CMapEditDlg::OnLoadMap() 
 {
-	// TODO: Add your command handler code here
+        // TODO: Add your command handler code here
         CFileDialog dlg(TRUE, "*.map",NULL,OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,"地图文件(*.map) | *.map"); 
         if(IDOK == dlg.DoModal())
         {
+                CString strPath = dlg.GetPathName();
+                if(!m_map.LoadMapFile((LPTSTR)(LPCTSTR)strPath))
+                {
+                        MessageBox("加载文件失败");
+                }
                 
+                ReleaseCellInfo();
+                
+                m_bmpNum = m_map.BitmapNum();
+                
+                m_pInfo = new CellInfo[m_bmpNum];
+
+                CDC *dc = this->GetDC();
+                
+                
+                for(int i=0; i<m_bmpNum; i++)
+                {
+                        m_pInfo[i].width = m_map.GetBitmap(i)->header.width;
+                        m_pInfo[i].height = m_map.GetBitmap(i)->header.height;
+                        m_pInfo[i].index = m_map.GetBitmap(i)->header.index;
+                        m_pInfo[i].name = m_map.GetBitmap(i)->header.name;
+                        
+                        // BITMAPINFO bmi;
+                        
+                     
+                        /*
+                        
+                        BITMAPINFOHEADER         bmih;
+                        BYTE                     *pBits;
+                        HBITMAP                  hBitmap;
+
+                        bmih.biSize                  = sizeof (BITMAPINFOHEADER);
+                        bmih.biWidth                 = m_pInfo[i].width;
+                        bmih.biHeight                = m_pInfo[i].height;
+                        bmih.biPlanes                = 1;
+                        bmih.biBitCount              = 24;
+                        bmih.biCompression           = BI_RGB;
+                        bmih.biSizeImage             = m_map.GetBitmap(i)->header.byteNum;
+                        bmih.biXPelsPerMeter         = 0;
+                        bmih.biYPelsPerMeter         = 0;
+                        bmih.biClrUsed               = 0;
+                        bmih.biClrImportant          = 0;
+                        
+                        // bmi.bmiHeader = bmih;
+                        // bmi.bmiColors = m_map.GetBitmap(i)->buffer;
+                        
+
+
+                        HANDLE hPal = GetStockObject(DEFAULT_PALETTE); 
+                        HDC hDC;
+                        HANDLE hOldPal;
+                        if (hPal) 
+                        { 
+                                hDC = ::GetDC(NULL); 
+                                hOldPal = ::SelectPalette(hDC, (HPALETTE)hPal, FALSE); 
+                                RealizePalette(hDC); 
+                        }
+                        
+                        // 获取该调色板下新的像素值 
+                        
+                        
+                        
+                        hBitmap = CreateDIBitmap(hDC, &bmih, 0,NULL, NULL, DIB_PAL_COLORS);
+                        
+                        
+                        
+                        //hBitmap = CreateDIBSection (NULL, (BITMAPINFO *)&bmih, DIB_RGB_COLORS, (void**)&pBits, NULL, 0) ;
+                        
+                        int k = SetDIBits(hDC, hBitmap, 0, m_pInfo[i].height, (void*)m_map.GetBitmap(i)->buffer, (BITMAPINFO *)&bmih, DIB_PAL_COLORS);
+                        
+                        //恢复调色板  
+                        if (hOldPal) 
+                        { 
+                                ::SelectPalette(hDC, (HPALETTE)hOldPal, TRUE); 
+                                RealizePalette(hDC); 
+                                ::ReleaseDC(NULL, hDC); 
+                        }
+                        
+                        
+                        if(NULL == hBitmap)
+                        {
+                                MessageBox("创建位图失败");
+                        }
+
+                        m_pInfo[i].hBitmap = hBitmap;
+                        
+                          //memcpy((char*)pBits, (char*)m_map.GetBitmap(i)->buffer, m_map.GetBitmap(i)->header.byteNum);
+                        */
+                        CBitmap bmp;
+                        
+
+                        bmp.CreateCompatibleBitmap(&m_dcMem, m_pInfo[i].width, m_pInfo[i].height);
+
+                        BITMAP bm;
+
+                        bmp.GetObject(sizeof(BITMAP), &bm);
+
+                        bmp.SetBitmapBits(m_map.GetBitmap(i)->header.byteNum, m_map.GetBitmap(i)->buffer);
+
+                        m_pInfo[i].dc = new CDC;
+
+                        m_pInfo[i].dc->CreateCompatibleDC(dc);
+                        m_pInfo[i].dc->SelectObject(&bmp);
+
+                        
+                        
+                       
+                }
+                
+                
+                ReleaseDC(dc);
+      
+
+                UpdateIconList();
         }
 	
 }
@@ -603,7 +885,83 @@ void CMapEditDlg::OnSaveMap()
          CFileDialog dlg(FALSE, "*.map",NULL,OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT,"地图文件(*.map) | *.map"); 
         if(IDOK == dlg.DoModal())
         {
+                CString strPath = dlg.GetPathName();
+                int *temp = new int[m_mapWidth * m_mapHeight];
+                memset((char*)temp, 0, m_mapWidth * m_mapHeight * sizeof(int));
                 
+                temp[0] = m_pMap[0];
+                int t=1;
+                
+                // 遍历所有的m_pMap数据，并挑选出所有的不重复的索引
+                int i=0, j=0;
+
+                for(i=1; i<m_mapWidth*m_mapHeight; i++)
+                {
+                        for(j=0; j<t; j++)
+                        {
+                                if(m_pMap[i] == temp[j])
+                                {
+                                        // 已经存在了，不存
+                                        break;
+                                }
+                        }
+
+                        // 没有相同的
+                        if(j == t)
+                        {
+                                temp[t] = m_pMap[i];
+                                t++;
+                        }
+                }
+
+                t--;
+
+                BMPINFO *bmp = new BMPINFO[t];
+
+                for(i=0; i<t; i++)
+                {
+                        for(j=0; j<m_bmpNum; j++)
+                        {
+                                if(m_pInfo[j].index == temp[i])
+                                {
+                                        // 找到了
+                                        SaveMyBmp(m_pInfo[j].hBitmap, bmp[i], m_pInfo[j].index,(LPTSTR)(LPCTSTR)m_pInfo[i].name);
+
+                                }
+                        }
+                }
+
+                m_map.SaveMapFile((LPTSTR)(LPCTSTR)strPath, m_mapWidth, 
+                        m_mapHeight, m_mapCellSize, m_pMap, bmp, t);
+
+                for(i=0; i<t; i++)
+                {
+                        if(bmp[i].buffer)
+                        {
+                                delete[] bmp[i].buffer;
+                        }
+                }
+
+                if(temp)
+                {
+
+                        delete[] temp; 
+                }
+
+                if(bmp)
+                {
+                        delete[] bmp;
+                }
+                
+                /*
+                RECT rc = {0, 0, m_mapWidth * m_mapCellSize, m_mapHeight * m_mapCellSize};
+                HBITMAP hBitmap = CopyDCToBitmap(m_dcView.m_hDC, &rc);
+                if(!SaveBmp(hBitmap, strPath))
+                {
+                        MessageBox("保存位图失败");
+                        return;
+                }
+                */
         }
 	// TODO: Add your command handler code here
 	
@@ -615,23 +973,263 @@ void CMapEditDlg::OnSelchangeCombo()
 	// TODO: Add your control notification handler code here
         int cursel = m_combo.GetCurSel();
         m_listPage = cursel;
-        m_curListEnd = m_bmpNum - 8*cursel;
-        if(m_curListEnd > 8)
-                m_curListEnd=8;
+
+        this->UpdateIconList();
+ 
+        this->InvalidateRect(&m_rcIcon);
+}
+
+HBITMAP CMapEditDlg::CopyDCToBitmap(HDC hSrcDC, LPRECT lpRect)
+{
+        if(hSrcDC==NULL || lpRect==NULL || IsRectEmpty(lpRect))            
+        {        
+                AfxMessageBox("参数错误");
+                return NULL;          
+        }
         
-        int i = 0;
-        for(i=0; i<m_curListEnd; i++)
-        {
-                m_dcMem.BitBlt(700, 50 + i*50, 32, 32, m_pInfo[i+8*m_listPage].dc, 0, 0, SRCCOPY);
-                m_stDis[i].SetWindowText((LPTSTR)(LPCTSTR)m_pInfo[i+8*m_listPage].name);
+        HDC        hMemDC;      
+        // 屏幕和内存设备描述表
+        HBITMAP    hBitmap,hOldBitmap;   
+        // 位图句柄
+        int       nX, nY, nX2, nY2;      
+        // 选定区域坐标
+        int       nWidth, nHeight;      
+        // 位图宽度和高度
+        
+        // 确保选定区域不为空矩形
+        if (IsRectEmpty(lpRect))
+                return NULL;
+        
+        // 获得选定区域坐标
+        nX = lpRect->left;
+        nY = lpRect->top;
+        nX2 = lpRect->right;
+        nY2 = lpRect->bottom;
+        
+        nWidth = nX2 - nX;
+        nHeight = nY2 - nY;
+        //为指定设备描述表创建兼容的内存设备描述表
+        hMemDC = CreateCompatibleDC(hSrcDC);
+        // 创建一个与指定设备描述表兼容的位图
+        hBitmap = CreateCompatibleBitmap(hSrcDC, nWidth, nHeight);
+        // 把新位图选到内存设备描述表中
+        hOldBitmap = (HBITMAP)SelectObject(hMemDC, hBitmap);
+        // 把屏幕设备描述表拷贝到内存设备描述表中
+        StretchBlt(hMemDC,0,0,nWidth,nHeight,hSrcDC,nX,nY,nWidth,nHeight,SRCCOPY);
+        //BitBlt(hMemDC, 0, 0, nWidth, nHeight,hScrDC, nX, nY, SRCCOPY);
+        //得到屏幕位图的句柄
+        
+        hBitmap = (HBITMAP)SelectObject(hMemDC, hOldBitmap);
+        //清除 
+        
+        DeleteDC(hMemDC);
+        DeleteObject(hOldBitmap);
+        // 返回位图句柄
+        return hBitmap;
+}
+
+//把HBITMAP保存成位图
+BOOL CMapEditDlg::SaveBmp(HBITMAP hBitmap, CString FileName)
+{     
+        if(hBitmap==NULL || FileName.IsEmpty())        
+        {          
+                AfxMessageBox("参数错误");       
+                return false;           
+        }
+        
+        HDC hDC;
+        //当前分辨率下每象素所占字节数
+        int iBits;
+        //位图中每象素所占字节数
+        WORD wBitCount;
+        //定义调色板大小， 位图中像素字节大小 ，位图文件大小 ， 写入文件字节数 
+        DWORD dwPaletteSize=0, dwBmBitsSize=0, dwDIBSize=0, dwWritten=0; 
+        //位图属性结构 
+        BITMAP Bitmap;  
+        //位图文件头结构
+        BITMAPFILEHEADER bmfHdr;  
+        //位图信息头结构 
+        BITMAPINFOHEADER bi;  
+        //指向位图信息头结构  
+        LPBITMAPINFOHEADER lpbi;  
+        //定义文件，分配内存句柄，调色板句柄 
+        HANDLE fh, hDib, hPal,hOldPal=NULL; 
+        
+        //计算位图文件每个像素所占字节数 
+        hDC = CreateDC("DISPLAY", NULL, NULL, NULL);
+        iBits = GetDeviceCaps(hDC, BITSPIXEL) * GetDeviceCaps(hDC, PLANES); 
+        DeleteDC(hDC); 
+
+    
+        if (iBits <= 1)  wBitCount = 1; 
+        else if (iBits <= 4)  wBitCount = 4; 
+        else if (iBits <= 8)  wBitCount = 8; 
+        else      wBitCount = 24; 
+      
+
+        GetObject(hBitmap, sizeof(Bitmap), (LPSTR)&Bitmap);
+        bi.biSize   = sizeof(BITMAPINFOHEADER);
+        bi.biWidth   = Bitmap.bmWidth;
+        bi.biHeight   = Bitmap.bmHeight;
+        bi.biPlanes   = 1;
+        bi.biBitCount  = wBitCount;
+        bi.biCompression = BI_RGB;
+        bi.biSizeImage  = 0;
+        bi.biXPelsPerMeter = 0;
+        bi.biYPelsPerMeter = 0;
+        bi.biClrImportant = 0;
+        bi.biClrUsed  = 0;
+        
+        dwBmBitsSize = ((Bitmap.bmWidth * wBitCount + 31) / 32) * 4 * Bitmap.bmHeight;
+
+        bi.biSizeImage = dwBmBitsSize;
+        
+        //为位图内容分配内存 
+        hDib = GlobalAlloc(GHND,dwBmBitsSize + dwPaletteSize + sizeof(BITMAPINFOHEADER)); 
+        lpbi = (LPBITMAPINFOHEADER)GlobalLock(hDib); 
+        *lpbi = bi;
+        
+        // 处理调色板  
+        hPal = GetStockObject(DEFAULT_PALETTE); 
+        if (hPal) 
+        { 
+                hDC = ::GetDC(NULL); 
+                hOldPal = ::SelectPalette(hDC, (HPALETTE)hPal, FALSE); 
+                RealizePalette(hDC); 
+        }
+        
+        // 获取该调色板下新的像素值 
+        GetDIBits(hDC, hBitmap, 0, (UINT) Bitmap.bmHeight, (LPSTR)lpbi + sizeof(BITMAPINFOHEADER) 
+                +dwPaletteSize, (BITMAPINFO *)lpbi, DIB_RGB_COLORS); 
+        
+        //恢复调色板  
+        if (hOldPal) 
+        { 
+                ::SelectPalette(hDC, (HPALETTE)hOldPal, TRUE); 
+                RealizePalette(hDC); 
+                ::ReleaseDC(NULL, hDC); 
+        }
+        
+        //创建位图文件  
+        fh = CreateFile(FileName, GENERIC_WRITE,0, NULL, CREATE_ALWAYS, 
+                FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN, NULL); 
+        
+        if (fh == INVALID_HANDLE_VALUE)  return FALSE; 
+        
+        // 设置位图文件头 
+        bmfHdr.bfType = 0x4D42; // "BM" 
+        dwDIBSize = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) + dwPaletteSize + dwBmBitsSize;  
+        bmfHdr.bfSize = dwDIBSize; 
+        bmfHdr.bfReserved1 = 0; 
+        bmfHdr.bfReserved2 = 0; 
+        bmfHdr.bfOffBits = (DWORD)sizeof(BITMAPFILEHEADER) + (DWORD)sizeof(BITMAPINFOHEADER) + dwPaletteSize; 
+        // 写入位图文件头 
+        WriteFile(fh, (LPSTR)&bmfHdr, sizeof(BITMAPFILEHEADER), &dwWritten, NULL); 
+        // 写入位图文件其余内容 
+        WriteFile(fh, (LPSTR)lpbi, dwDIBSize, &dwWritten, NULL); 
+        //清除  
+        GlobalUnlock(hDib); 
+        GlobalFree(hDib); 
+        CloseHandle(fh);
+        
+        return TRUE;
+}
+
+BOOL CMapEditDlg::SaveMyBmp(HBITMAP hBitmap, BMPINFO &bmp, int mapIndex, const char *name)
+{
+
+        if(hBitmap==NULL)        
+        {          
+                AfxMessageBox("参数错误");       
+                return false;           
+        }
+        
+        HDC hDC;
+        //当前分辨率下每象素所占字节数
+        int iBits;
+        //位图中每象素所占字节数
+        WORD wBitCount;
+        //定义调色板大小， 位图中像素字节大小 ，位图文件大小 ， 写入文件字节数 
+        DWORD dwPaletteSize=0, dwBmBitsSize=0, dwDIBSize=0, dwWritten=0; 
+        //位图属性结构 
+        BITMAP Bitmap;  
+
+        //位图信息头结构 
+        BITMAPINFOHEADER bi;  
+        //指向位图信息头结构  
+        LPBITMAPINFOHEADER lpbi;  
+        //定义文件，分配内存句柄，调色板句柄 
+        HANDLE hDib, hPal,hOldPal=NULL; 
+        
+        //计算位图文件每个像素所占字节数 
+        hDC = CreateDC("DISPLAY", NULL, NULL, NULL);
+        iBits = GetDeviceCaps(hDC, BITSPIXEL) * GetDeviceCaps(hDC, PLANES); 
+        DeleteDC(hDC); 
+
+        /*
+        if (iBits <= 1)  wBitCount = 1; 
+        else if (iBits <= 4)  wBitCount = 4; 
+        else if (iBits <= 8)  wBitCount = 8; 
+        else      wBitCount = 24; 
+        */
+        
+        wBitCount = 24;
+
+        GetObject(hBitmap, sizeof(Bitmap), (LPSTR)&Bitmap);
+        bi.biSize   = sizeof(BITMAPINFOHEADER);
+        bi.biWidth   = Bitmap.bmWidth;
+        bi.biHeight   = Bitmap.bmHeight;
+        bi.biPlanes   = 1;
+        bi.biBitCount  = wBitCount;
+        bi.biCompression = BI_RGB;
+        bi.biSizeImage  = 0;
+        bi.biXPelsPerMeter = 0;
+        bi.biYPelsPerMeter = 0;
+        bi.biClrImportant = 0;
+        bi.biClrUsed  = 0;
+        
+        dwBmBitsSize = ((Bitmap.bmWidth * wBitCount + 31) / 32) * 4 * Bitmap.bmHeight;
+
+        bi.biSizeImage = dwBmBitsSize;
+        
+        //为位图内容分配内存 
+        hDib = GlobalAlloc(GHND,dwBmBitsSize + dwPaletteSize + sizeof(BITMAPINFOHEADER)); 
+        lpbi = (LPBITMAPINFOHEADER)GlobalLock(hDib); 
+        *lpbi = bi;
+        
+        // 处理调色板  
+        hPal = GetStockObject(DEFAULT_PALETTE); 
+        if (hPal) 
+        { 
+                hDC = ::GetDC(NULL); 
+                hOldPal = ::SelectPalette(hDC, (HPALETTE)hPal, FALSE); 
+                RealizePalette(hDC); 
         }
 
-        for(i=m_curListEnd; i<8; i++)
-        {
-                m_dcMem.BitBlt(700, 50 + i*50, 32, 32, &m_dcDef, 0, 0, SRCCOPY);
-                m_stDis[i].SetWindowText("未载入");
-        }
+        bmp.header.width = bi.biWidth;
+        bmp.header.height = bi.biHeight;
+        bmp.header.byteNum = bi.biSizeImage;
+        bmp.header.index = mapIndex;
+        bmp.header.bpp = bi.biBitCount;
+        strcpy(bmp.header.name, name);
+        bmp.buffer = new char[bi.biSizeImage];
+
+
         
-        this->Invalidate();
-	
+        // 获取该调色板下新的像素值 
+        GetDIBits(hDC, hBitmap, 0, (UINT) Bitmap.bmHeight, bmp.buffer, 
+                (BITMAPINFO *)lpbi, DIB_RGB_COLORS); 
+
+        if (hOldPal) 
+        { 
+                ::SelectPalette(hDC, (HPALETTE)hOldPal, TRUE); 
+                RealizePalette(hDC); 
+                ::ReleaseDC(NULL, hDC); 
+        }
+
+        
+        //清除  
+        GlobalUnlock(hDib); 
+        GlobalFree(hDib); 
+        return TRUE;
 }

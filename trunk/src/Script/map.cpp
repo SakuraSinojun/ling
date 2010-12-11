@@ -10,6 +10,105 @@
 using namespace std;
 
 
+bool CMap::SaveMapFile(const char *fileName, int mapWidth, int mapHeight, int cellSize,
+                   int *pMap, BMPINFO *bmp, int bmpNum)
+{
+        if(NULL == pMap || NULL == bmp)
+        {
+                return false;
+        }
+        MAPINFO mapInfo;
+
+        mapInfo.header.bmpNum = bmpNum;
+        mapInfo.header.cellSize = cellSize;
+        mapInfo.header.height = mapHeight;
+        mapInfo.header.width = mapHeight;
+        mapInfo.pMap = pMap;
+        ofstream ofs;
+        ofs.open(fileName, ios::out|ios::binary);
+        if(!ofs)
+        {
+                return false;
+        }
+        ofs.write((char*)&MAPFILEFLAG, sizeof(char));
+
+        ofs.write((char*)&mapInfo.header, sizeof(mapInfo.header));
+        ofs.write((char*)mapInfo.pMap, mapWidth * mapHeight * sizeof(int));
+        for(int i=0; i<bmpNum; i++)
+        {
+                ofs.write((char*)&bmp[i].header, sizeof(bmp[i].header));
+                ofs.write((char*)bmp[i].buffer, sizeof(bmp[i].header.byteNum));
+        }
+
+        ofs.close();
+        return true;
+}
+
+bool CMap::LoadMapFile(const char *fileName)
+{
+        if(NULL == fileName)
+        {
+                return false;
+        }
+
+        ifstream ifs;
+        ifs.open(fileName, ios::in|ios::binary);
+        if(!ifs)
+        {
+                return false;
+        }
+
+        char flag=0;
+        int i=0;
+
+        ifs.read(&flag, sizeof(char));
+
+        if(flag != MAPFILEFLAG)
+        {
+                return false;
+        }
+
+        MAPINFO mapInfo;
+
+        ifs.read((char*)&mapInfo.header, sizeof(mapInfo.header));
+
+        m_width = mapInfo.header.width;
+        m_height = mapInfo.header.height;
+        m_cellSize = mapInfo.header.cellSize;
+        m_bmpNum = mapInfo.header.bmpNum;
+
+        if(m_pInfo)
+        {
+                delete[] m_pInfo;
+        }
+        m_pInfo = new int[m_width * m_height];
+        ifs.read((char*)m_pInfo, sizeof(int) * m_width * m_height);
+
+        if(m_pBmp)
+        {
+                for(i=0; i<m_bmpNum; i++)
+                {
+                        if(m_pBmp[i].buffer)
+                        {
+                                delete[] m_pBmp[i].buffer;
+                        }
+                }
+                
+                delete[] m_pBmp;
+        }
+        m_pBmp = new BMPINFO[mapInfo.header.bmpNum];
+        for(i=0; i<m_bmpNum; i++)
+        {
+                               
+                ifs.read((char*)&m_pBmp[i].header, sizeof(m_pBmp[i].header));
+                m_pBmp[i].buffer = new char[m_pBmp[i].header.byteNum];
+                ifs.read((char*)m_pBmp[i].buffer, sizeof(m_pBmp[i].header.byteNum));
+        }
+        
+
+        ifs.close();
+        return true;
+}
 CMap * CMap::m_map = NULL;
 
 
@@ -17,12 +116,25 @@ CMap * CMap::m_map = NULL;
 CMap::CMap()
 {
 	m_square = NULL;
-	m_width = 0;
-	m_height = 0;
+        memset((char*)&m_pInfo, 0, sizeof(m_pInfo));
+        m_pBmp = NULL;
 }
 
 CMap::~CMap ()
 {
+        if(m_pBmp)
+        {
+                for(int i=0; i<m_bmpNum; i++)
+                {
+                        if(m_pBmp[i].buffer)
+                        {
+                                delete[] m_pBmp[i].buffer;
+                                m_pBmp[i].buffer = NULL;
+                        }
+                }
+                delete[] m_pBmp;
+                m_pBmp = NULL;
+        }
 	m_map = NULL;
         m_mainSur = NULL;
 }
@@ -158,26 +270,13 @@ MAPSQUARE * CMap::GetSqr(int x, int y)
 	return m_square + offset;
 }
 
-bool CMap::WriteMap(const char *fileName)
+const BMPINFO *CMap::GetBitmap(int index)
 {
-        ofstream ofs(fileName);
-        if(!ofs)
+        if(index >= m_bmpNum)
         {
-                return false;
+                return NULL;
         }
-
-        ofs<<"<SIZE>"<<endl;
-        ofs<<m_width<<" "<<m_height<<" "<<m_cellSize<<endl;
-        ofs<<"<RES>"<<endl;
-        for(map<int, CBitmap>::iterator iter =0; iter != m_mapBmp.end(); iter++)
-        {
-                ofs<<"["<<iter->first<<"]"<<endl;
-                ofs<<iter->second.GetBuffer()<<endl;
-        }
-        ofs<<"<MAPINFO>"<<endl;
-        ofs<<m_mapInfo<<endl;
-        ofs.close();
-
-        return true;
+        return &m_pBmp[index];
 }
+
 

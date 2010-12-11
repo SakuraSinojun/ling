@@ -90,9 +90,137 @@ LINK32=link.exe
 # Begin Group "Source Files"
 
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
+# Begin Group "LibGraphic"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\src\LibGraphic\DDrawCommon.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\LibGraphic\DDrawCommon.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\LibGraphic\DxSurface.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\LibGraphic\DxSurface.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\LibGraphic\Geometry.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\LibGraphic\geometry.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\LibGraphic\LibDDraw.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\LibGraphic\LibGraphic.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\LibGraphic\Surface.h
+# End Source File
+# End Group
+# Begin Group "Common"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\src\common\comdef.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\common\common.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\common\config.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\common\datafile.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\common\error.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\common\Game.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\common\Game.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\common\ling.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\common\Memory.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\common\Memory.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\common\Parser.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\common\Parser.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\common\preload.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\common\stdafx.h
+# End Source File
+# End Group
+# Begin Group "Script"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\src\Script\bitmap.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\Script\bitmap.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\Script\map.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\Script\map.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\Script\MapDef.h
+# End Source File
+# End Group
 # Begin Source File
 
 SOURCE=.\MapEdit.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\MapEdit.h
 # End Source File
 # Begin Source File
 
@@ -104,32 +232,11 @@ SOURCE=.\MapEditDlg.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\NewMapDlg.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\src\common\Parser.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\StdAfx.cpp
-# ADD CPP /Yc"stdafx.h"
-# End Source File
-# End Group
-# Begin Group "Header Files"
-
-# PROP Default_Filter "h;hpp;hxx;hm;inl"
-# Begin Source File
-
-SOURCE=..\src\Script\MapDef.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\MapEdit.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\MapEditDlg.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\NewMapDlg.cpp
 # End Source File
 # Begin Source File
 
@@ -137,16 +244,21 @@ SOURCE=.\NewMapDlg.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\src\common\Parser.h
+SOURCE=.\Resource.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\Resource.h
+SOURCE=.\StdAfx.cpp
+# ADD CPP /Yc"stdafx.h"
 # End Source File
 # Begin Source File
 
 SOURCE=.\StdAfx.h
 # End Source File
+# End Group
+# Begin Group "Header Files"
+
+# PROP Default_Filter "h;hpp;hxx;hm;inl"
 # End Group
 # Begin Group "Resource Files"
 
