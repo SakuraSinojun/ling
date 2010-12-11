@@ -15,10 +15,10 @@ Class3=CMapEditView
 Class4=CMapEditDlg
 
 ResourceCount=4
-Resource1=IDD_DLG_MAPEDIT
-Resource2=IDD_ABOUTBOX
+Resource1=IDD_ABOUTBOX
+Resource2=IDR_MAINFRAME
 Class5=CAboutDlg
-Resource3=IDR_MAINFRAME
+Resource3=IDD_DLG_MAPEDIT
 Class6=CNewMapDlg
 Resource4=IDD_DLG_NEW
 
