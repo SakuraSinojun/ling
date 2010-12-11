@@ -15,10 +15,10 @@ Class3=CMapEditView
 Class4=CMapEditDlg
 
 ResourceCount=4
-Resource1=IDR_MAINFRAME
-Resource2=IDD_DLG_MAPEDIT
+Resource1=IDD_DLG_MAPEDIT
+Resource2=IDD_ABOUTBOX
 Class5=CAboutDlg
-Resource3=IDD_ABOUTBOX
+Resource3=IDR_MAINFRAME
 Class6=CNewMapDlg
 Resource4=IDD_DLG_NEW
 
@@ -114,7 +114,7 @@ HeaderFile=MapEditDlg.h
 ImplementationFile=MapEditDlg.cpp
 BaseClass=CDialog
 Filter=W
-LastObject=IDC_COMBO
+LastObject=ID_SAVEMAP
 VirtualFilter=dWC
 
 [DLG:IDD_DLG_NEW]

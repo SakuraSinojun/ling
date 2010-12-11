@@ -9,16 +9,16 @@
 
 /////////////////////////////////////////////////////////////////////////////
 // CMapEditDlg dialog
-#define GAME_WINDOW_WIDTH 640
-#define GAME_WINDOW_HEIGHT 480
 
 #include "../src/Script/map.h"
 #include "../src/common/parser.h"
+
 #include <vector>
 #include <map>
 using namespace std;
 
-struct MapInfo
+#define ICON_NUM 6
+struct CellInfo
 {
         int index;
         CString name;
@@ -26,6 +26,8 @@ struct MapInfo
         bool bLoaded;
         HBITMAP hBitmap;
         CDC *dc;
+        int width;
+        int height;
 };
 
 class CMapEditDlg : public CDialog
@@ -40,46 +42,107 @@ public:
 
         void ShowMap(CDC &dcMemory);
 
+        void InitList();
+
+        void UpdateIconList();
+
+        void ClientToMap(POINT &pt);
+
+        HBITMAP CopyDCToBitmap(HDC hSrcDc, LPRECT lpRect);
+
+        BOOL SaveBmp(HBITMAP hBitmap, CString FileName);
+
+        BOOL SaveMyBmp(HBITMAP hBitmap, BMPINFO &bmp, int mapIndex, const char *name);
+
+        void ReleaseCellInfo();
+
 private:
-        CDC m_dcMem;
-        CDC m_dcView;
-        CDC m_dcChoose;
-        CDC m_dcDef;
+
+        // 整个程序窗口的尺寸
+        int m_width;
+        int m_height;
+
+        // 地图编辑区的尺寸
+        int m_viewWidth;
+        int m_viewHeight;
+
+        // 当前选择图标的尺寸
+        int m_curWidth;
+        int m_curHeight;
+
+        // 当前选择的图标的索引
         int m_indexChoose;
 
-    
-   
+        // 是否选择了一个图标
+        bool m_bChoose;
 
-        CStatic m_stDis[8];
+        // 当前选择的图标
+        CDC m_dcChoose;
 
+        // 显示鼠标在地图中的位置
+        RECT m_rcText;
+
+        // 保存图标类表中，每个图标的矩形区域
+        RECT m_rcIcons[ICON_NUM];
+
+        // 双缓冲
+        CDC m_dcMem;
+
+        // 地图编辑区
+        CDC m_dcView;
+        
+        // 默认的未加载图标的样式
+        CDC m_dcDef;
+
+        // 图标信息显示空间
+        CStatic m_stDis[ICON_NUM];
  
+        // 当前图标列表的最后一个图标位置
         int m_curListEnd;
+
+        // 当前所在图标列表的页
         int m_listPage;
 
-  
-
+        // 地图编辑的最小单元尺寸
         int m_mapCellSize;
+
+        // 地图尺寸
         int m_mapWidth;
         int m_mapHeight;
+
+        // 地图名称
         CString m_mapName;
 
+        // 滚动条的位置
         UINT m_barPosVer;
         UINT m_barPosHor;
+
+        // 滚动条的范围
         int m_rangeHor;
         int m_rangeVer;
 
+        // 地图编辑区的矩形位置
         RECT m_rcView;
+
+        // 图标区的位置
         RECT m_rcIcon;
-        bool m_bChoose;
 
-        int *m_data;
+        // 储存地图的索引
+        int *m_pMap;
 
+        // 文本分析
         Parser m_parser;
+        
+        // 加载的所有图标的列表
+        CellInfo *m_pInfo;
+
+        // 图标列表的大小
         int m_bmpNum;
-        MapInfo *m_pInfo;
+
+        // 图标加载路径
         CString m_bmpPath;
 
-        
+        CMap m_map;
 
 // Dialog Data
 	//{{AFX_DATA(CMapEditDlg)

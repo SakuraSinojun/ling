@@ -21,7 +21,6 @@
 // 可以专门做一个trigger管理类
 
 class CSurface;
-class CLBitmap;
 
 typedef struct
 {
@@ -33,16 +32,48 @@ typedef struct
 	int			y2;
 }MAPSQUARE;
 
+static const char MAPFILEFLAG = '~';
+    
 #define MODE_CELL 1              
 #define MODE_ABS  0
+
+struct BMPHEAD
+{
+        int width;
+        int height;
+        int byteNum;
+        int index;
+        int bpp;
+        char name[20];
+};
+
+struct BMPINFO
+{
+        BMPHEAD header;        
+        char *buffer;
+};
+
+struct MAPHEAD
+{
+        int cellSize;           // 单元格大小       
+        int width;              // 画面宽度
+        int height;             // 画面高度
+        int bmpNum;  
+};
+
+struct MAPINFO
+{
+        MAPHEAD header;
+        int *pMap;
+
+};
 
 // 单件CMap类。用CMap::GetMap()取得地图单件。
 class CMap
 {
-protected:
-	CMap();
-
+              
 public:
+         CMap();
 	~CMap();
 	static CMap * GetMap();
 
@@ -54,14 +85,21 @@ public:
         bool AddFrame(const CBitmap &bmp, int frameIndex, int x, int y, int mode);
 	
 	void AddTrigger(int x, int y, void * trigger_function);
-
-        bool LoadMap(const char *fileName);
-        bool WriteMap(const char *fileName);
 	
 	MAPSQUARE * GetSqr(int x, int y);
 
 	int Width(){return m_width;}
 	int Height(){return m_height;}
+        int BitmapNum(){return m_bmpNum;}
+
+        const BMPINFO *GetBitmap(int index);
+
+        bool SaveMapFile(const char *fileName, int mapWidth, int mapHeight, int cellSize,
+                   int *pMap, BMPINFO *bmp, int bmpNum); 
+
+        bool LoadMapFile(const char *fileName);
+
+       
 
 private:
 	static CMap *	m_map;
@@ -73,10 +111,13 @@ private:
 	MAPSQUARE * m_square;
 
         CSurface *m_mainSur;
+        CSurface *m_surMap;
 
-        char *m_mapInfo;
-        std::vector<CSurface*> m_vSur;
-        std::map<int, CBitmap> m_mapBmp;
+        BMPINFO *m_pBmp;
+
+        int m_bmpNum;
+
+        int *m_pInfo;
 
 private:
 	bool CheckPos(int x, int y);
