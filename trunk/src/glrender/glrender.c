@@ -1,7 +1,7 @@
 
 /*******************************************************************************
 
-        Ahthor: ׼
+        Author: ׼
         Tab:    8
 
 *******************************************************************************/
@@ -198,7 +198,9 @@ DWORD WINAPI _render_thread(LPVOID lpParameter)
                                return 1;
                        }
                 case ST_PAUSE:
-                        PulseEvent(hEvent);
+                        Sleep(100);
+                        SetEvent(hEvent);
+                        //PulseEvent(hEvent);
                         Sleep(100);
                         break;
                 case ST_INIT:
