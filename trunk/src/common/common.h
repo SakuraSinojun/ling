@@ -34,7 +34,7 @@ namespace common
 
 #ifdef __cplusplus
 }
-#edif
+#endif
 
 
 
