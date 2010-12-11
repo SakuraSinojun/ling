@@ -22,12 +22,11 @@ protected:
 	CRender();
 public:
 	~CRender();
-	static CRender * GetRender(void);
+	static CRender * Get(void);
 	BOOL	InitRender(const char * strRenderDLLName);
 	
 	
 	BOOL	Attach(HWND hWnd);
-	BOOL	Detach(void);
 	BOOL	Pause(void);
 	BOOL	Start(void);
 	BOOL	Stop(void);
@@ -56,12 +55,11 @@ private:
 	struct
 	{
 		void *	render_attach;
-		void *	render_detach;
 		void *	render_pause;
 		void *	render_start;
 		void *	render_stop;
 		void *	render_RenderScene;
-	
+
 		void *  render_create_object;
 		void *  render_create_panel;
 		void *  render_create_map;

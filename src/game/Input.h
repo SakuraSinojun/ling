@@ -14,20 +14,20 @@
 
 
 #include "../common/common.h"
+#include <windows.H>
 
 enum INPUT
 {
         INPUT_NONE,
-
+        INPUT_NEWINPUT,
 };
 
 typedef struct
 {
         DWORD     input;
-        DWORD     arg1;
-        DWORD     arg2;
-        DWORD     arg3;
-        DWORD     arg4;
+        int       x;
+        int       y;
+        int       key[256];
 }INPUT_STRUCT;
 
 
@@ -35,7 +35,7 @@ typedef struct
 namespace Input
 {        
         void    ParseInput(INPUT_STRUCT& input);
-        
+        void    AtachInput(HWND hWnd);
 
         /*
         void    MouseLButtonDown(int x, int y);

@@ -15,7 +15,6 @@
 #define RENDER_API	__cdecl
 
 typedef BOOL (RENDER_API * LPFNRENDERATTACH)(HWND hWnd);
-typedef BOOL (RENDER_API * LPFNRENDERDETACH)(void);
 typedef BOOL (RENDER_API * LPFNRENDERPAUSE)(void);
 typedef BOOL (RENDER_API * LPFNRENDERSTART)(void);
 typedef BOOL (RENDER_API * LPFNRENDERSTOP)(void);
@@ -56,7 +55,7 @@ CRender::~CRender()
 	m_render = NULL;
 }
 	
-CRender * CRender::GetRender(void)
+CRender * CRender::Get(void)
 {
 	if(m_render == NULL)
 	{
@@ -99,12 +98,10 @@ BOOL CRender::InitRender(const char * strRenderDLLName)
 	memset(&funs, 0, sizeof(funs));
 	
 	funs.render_attach = (void *)GetProcAddress(hModule, "render_attach");
-	funs.render_detach = (void *)GetProcAddress(hModule, "render_detach");
 	funs.render_pause = (void *)GetProcAddress(hModule, "render_pause");
 	funs.render_start = (void *)GetProcAddress(hModule, "render_start");
 	funs.render_stop = (void *)GetProcAddress(hModule, "render_stop");
 	funs.render_RenderScene = (void *)GetProcAddress(hModule, "RenderScene");
-	
 	funs.render_create_object = (void *)GetProcAddress(hModule, "render_create_object");
 	funs.render_create_panel = (void *)GetProcAddress(hModule, "render_create_panel");
 	funs.render_create_map = (void *)GetProcAddress(hModule, "render_create_map");
@@ -158,10 +155,6 @@ BOOL	CRender::Attach(HWND hWnd)
 	return ((LPFNRENDERATTACH)funs.render_attach)(hWnd);
 }
 
-BOOL	CRender::Detach(void)
-{
-	return ((LPFNRENDERDETACH)funs.render_detach)();
-}
 
 BOOL	CRender::Pause(void)
 {

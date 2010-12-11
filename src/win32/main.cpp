@@ -3,6 +3,8 @@
 #include "../common/common.h"
 #include "../game/render.h"
 #include "../game/game.h"
+#include "../game/mod.h"
+#include "../game/input.h"
 
 
 #include <windows.h>
@@ -71,6 +73,13 @@ void CreateLingWindow(WNDPROC _lpfnWindowProc, int width, int height, bool onidl
 		{
 			if (::PeekMessage(&msgCur, NULL, 0, 0, PM_NOREMOVE))
 			{
+                                /*
+                                if(msgCur.message == WM_USER + 0x401)
+                                {
+                                       //PeekMessage(&msgCur, NULL, 0, 0, PM_REMOVE);
+                                        PostMessage(hWnd, WM_CLOSE, 0, 0);
+                                }
+                                */
 				if (!::GetMessage(&msgCur, NULL, 0, 0))
 					return;
 
@@ -91,7 +100,21 @@ void CreateLingWindow(WNDPROC _lpfnWindowProc, int width, int height, bool onidl
 			}
 		}
 	}else{
-		while(GetMessage(&msgCur, NULL, 0, 0))  {
+                while(true)
+                {
+                        /*
+		        if(PeekMessage(&msgCur, NULL, 0, 0, PM_NOREMOVE))
+                        {
+                                if(msgCur.message == WM_USER + 0x401)
+                                {
+                                        PostMessage(hWnd, WM_CLOSE, 0, 0);
+                                }
+                        }
+                        */
+                        if(GetMessage(&msgCur, NULL, 0, 0) == 0)
+                        {
+                                break;
+                        }
 			TranslateMessage(&msgCur);
 			DispatchMessage(&msgCur);
 		}
@@ -111,11 +134,19 @@ BOOL OnIdle(LONG count)
 	return TRUE;
 }
 
+
+void OnPaint(HWND hWnd, HDC hdc)
+{
+        Mod::PaintMainMenu();
+}
+
 void OnCreate(HWND hWnd)
 {
         CGame * game = CGame::Get();
-        CRender * render = CRender::GetRender();
+        CRender * render = CRender::Get();
         
+        Input::AtachInput (hWnd);
+
         if(!render->InitRender("glrender.dll"))
         {
                 common::Error("no render dll...");
@@ -131,16 +162,19 @@ void OnCreate(HWND hWnd)
         render->Start();
         game->Run();
         
+        Mod::LoadMod (".\\Mod");
+        Mod::ShowMainMenu (hWnd);
+
 }
 
 void OnClose()
 {
         CGame * game = CGame::Get();
-        CRender * render = CRender::GetRender();
+        CRender * render = CRender::Get();
         
         game->Stop();
         render->Stop();
-        render->Detach();
+
         
 }
 
@@ -149,7 +183,7 @@ void OnClose()
 LRESULT CALLBACK _WndProc(HWND hwnd, UINT uMsg, WPARAM wParam,LPARAM lParam) 
 { 
 
-	//PAINTSTRUCT 	ps;
+        PAINTSTRUCT 	ps;
 	
 	switch(uMsg) 
 	{
@@ -163,6 +197,12 @@ LRESULT CALLBACK _WndProc(HWND hwnd, UINT uMsg, WPARAM wParam,LPARAM lParam)
 	case WM_DESTROY:
 		exit(0);
 		break;
+        case WM_PAINT:
+                BeginPaint(hwnd, &ps);
+                OnPaint(hwnd, ps.hdc);
+                EndPaint(hwnd, &ps);
+                break;
+        case WM_ERASEBKGND:
 	default:
 		return DefWindowProc(hwnd,uMsg,wParam,lParam); 
 	} 
