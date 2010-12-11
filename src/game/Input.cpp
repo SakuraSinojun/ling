@@ -5,6 +5,7 @@
 
 #include "input.h"
 #include "mod.h"
+#include "game.h"
 
 #include <windows.h>
 
@@ -26,6 +27,14 @@ namespace Input
                 short   k;
                 short   test;
                 bool    flag;
+                
+
+                if(!IsIconic(m_hWnd))
+                {
+                        memset(&wi, 0, sizeof(wi));
+                        wi.input = INPUT_NONE;
+                        return;
+                }
 
                 GetCursorPos(&point);
                 ScreenToClient(m_hWnd, &point);
