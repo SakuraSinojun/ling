@@ -109,7 +109,12 @@ namespace       Mod
                         }                 
                 }
 
-                MouseMove(wi.x, wi.y);
+                //MouseMove(wi.x, wi.y);
+
+                if(IsMainMenu())
+                {
+                        PaintMainMenu();
+                }
         }
         
         void MouseButtonDown()
@@ -133,22 +138,8 @@ namespace       Mod
 
         void MouseMove(int x, int y)
         {
-                static bool isIn = false;
-                POINT point;
-                point.x = x;
-                point.y = y;
-                if(PtInRect(&rcStart, point) || PtInRect(&rcQuit, point))
-                {
-                        isIn = true;
-                        InvalidateRect(m_hWnd, NULL, FALSE);
-                }else{
-                        if(isIn)
-                        {
-                                InvalidateRect(m_hWnd, NULL, FALSE);
-                                isIn = false;
-                        }
-                }
         }
+
 ///////////////////////////////////////////////////////////////////////////////////////
 //
 //

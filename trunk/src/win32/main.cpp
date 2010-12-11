@@ -137,7 +137,7 @@ BOOL OnIdle(LONG count)
 
 void OnPaint(HWND hWnd, HDC hdc)
 {
-        Mod::PaintMainMenu();
+        //Mod::PaintMainMenu();
 }
 
 void OnCreate(HWND hWnd)

@@ -139,6 +139,10 @@ DWORD WINAPI _render_thread(LPVOID lpParameter)
 	{
 		EnterCriticalSection(&cs);
 			s = m_State;
+                        if(m_State == ST_PAUSE)
+                        {
+                                m_State = ST_INIT;
+                        }
 		LeaveCriticalSection(&cs);
 
 		switch (s)
@@ -223,7 +227,7 @@ BOOL _render_create_thread()
 	}
 
 	InitializeCriticalSection(&cs);
-        hEvent = CreateEvent(&sa, FALSE, FALSE, "PauseEvent");
+        hEvent = CreateEvent(&sa, TRUE, FALSE, "PauseEvent");
 
 	hThread = CreateThread(&sa, 0, 
 			_render_thread, NULL, 
@@ -298,12 +302,16 @@ BOOL render_attach(HWND hWnd)
 
 BOOL render_pause()
 {
+        printf("pausing render\n");
+        
+        ResetEvent(hEvent);
 	EnterCriticalSection(&cs);
 		m_State = ST_PAUSE;
 	LeaveCriticalSection(&cs);
-	printf("pause render\n");
+	WaitForSingleObject(hEvent, INFINITE);
+        ResetEvent(hEvent);
 
-        WaitForSingleObject(hEvent, INFINITE);
+        printf("paused.\n");
 
 	return TRUE;
 
@@ -326,11 +334,12 @@ BOOL render_stop()
                 return TRUE;
         }
 
+        printf("stoping render\n");
+        
 	EnterCriticalSection(&cs);
 		m_State = ST_STOP;
 	LeaveCriticalSection(&cs);
-	printf("stop render\n");
-        
+	
         if(WaitForSingleObject (hThread, 5000) == WAIT_TIMEOUT)
         {
                 _render_error("线程超时。强制结束。");
@@ -338,7 +347,9 @@ BOOL render_stop()
         }
         
         CloseHandle(hEvent);
-	return TRUE;
+	
+        printf("Stopped.\n");
+        return TRUE;
 }
 
 int render_create_object(void* buffer, int len, int type)
