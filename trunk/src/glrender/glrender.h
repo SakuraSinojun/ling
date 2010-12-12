@@ -31,7 +31,7 @@ DLL_EXPORTS BOOL RENDER_API render_pause(void);
 DLL_EXPORTS BOOL RENDER_API render_start(void);
 DLL_EXPORTS BOOL RENDER_API render_stop(void);
 
-DLL_EXPORTS void RENDER_API RenderScene(void);
+DLL_EXPORTS void RENDER_API _render_render(void);
 
 
 

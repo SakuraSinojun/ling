@@ -14,7 +14,7 @@
 
 #include "comdef.h"
 #include "typedef.h"
-
+#include "debug.h"
 
 #ifndef __cplusplus
 #define common::Error   Error
@@ -23,6 +23,8 @@
 #define pl::unloadall   unloadall
 #define res::loadimg    loadimg
 #endif
+
+#define printf  __out_debug_
 
 
 

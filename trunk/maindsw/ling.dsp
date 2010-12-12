@@ -179,6 +179,10 @@ SOURCE=..\src\common\datafile.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\src\common\debug.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\src\common\error.cpp
 # End Source File
 # Begin Source File

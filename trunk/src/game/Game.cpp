@@ -46,6 +46,7 @@ DWORD WINAPI _game_thread(LPVOID lpParameter)
                 if(GetForegroundWindow() != GetMainHwnd())
                 {
                         Sleep(500);
+                        continue;
                 }
 
                 Input::ParseInput(input);
@@ -60,7 +61,7 @@ DWORD WINAPI _game_thread(LPVOID lpParameter)
                         //CNpc::WanderAbout();		// NPC走来走去。。。
                         //CMonster::WanderAbout();	// 怪物也走来走去。。。
                         //CPet::WanderAbout();		// 如果有宝宝。它也走来走去。。
-                        Sleep(0);
+                        Sleep(10);
                         break;
                 case ST_PAUSE:
                         Sleep(1);

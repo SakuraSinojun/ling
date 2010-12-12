@@ -14,34 +14,56 @@
 #include <GL/glu.h>
 #include <math.h>
 
-enum GAME_STATE
+typedef enum GAME_STATE
 {
 	ST_INIT = 0,
 	ST_RUN,
 	ST_PAUSE,
 	ST_STOP,
-};
+}GAME_STATE;
 
 static HWND	m_hWnd = NULL;
 static HDC	m_hDC = NULL;
 static HGLRC	m_hRC = NULL;
-static enum GAME_STATE m_State = ST_INIT;
 static HANDLE	hThread = NULL;
 static DWORD	lpThreadId = 0; 
-static CRITICAL_SECTION	cs;
 static HANDLE   hEvent = NULL;
+static BOOL     bObjectChanged = TRUE;
 
+static GAME_STATE       m_State = ST_INIT;
+static CRITICAL_SECTION	cs;
+static CRITICAL_SECTION	cs_changed;
 
 ///////////////////////////////////////////////////////////////////////////
 
 DWORD WINAPI _render_thread(LPVOID lpParameter);
-void RenderSence(void);
+void RenderScene(void);
 void SetupRC(void);
 void ChangeSize(GLsizei w, GLsizei h);
 
 
 ///////////////////////////////////////////////////////////////////////////
 
+
+BOOL _is_changed()
+{
+        BOOL res ;
+        EnterCriticalSection(&cs_changed);
+        {
+                res = bObjectChanged;
+        }
+        LeaveCriticalSection(&cs_changed);
+        return res;
+}
+
+void _set_change(BOOL bChange)
+{
+        EnterCriticalSection(&cs_changed);
+        {
+                bObjectChanged = bChange;
+        }
+        LeaveCriticalSection(&cs_changed);
+}
 
 
 void _render_error(const char * string, ...)
@@ -137,7 +159,8 @@ DWORD WINAPI _render_thread(LPVOID lpParameter)
 	
 	while(TRUE)
 	{
-		EnterCriticalSection(&cs);
+		
+                EnterCriticalSection(&cs);
 			s = m_State;
                         if(m_State == ST_PAUSE)
                         {
@@ -158,14 +181,22 @@ DWORD WINAPI _render_thread(LPVOID lpParameter)
 				break;
 			}
                         _render_calcFPS();
-			GetClientRect(m_hWnd, &rect);
+
+                        GetClientRect(m_hWnd, &rect);
 			if(rect.right-rect.left != orc.right-orc.left || rect.bottom-rect.top != orc.bottom-orc.top)
 			{
 				ChangeSize(rect.right-rect.left, rect.bottom-rect.top);
 				orc = rect;
 			}
-			RenderScene();
 
+                        if(!_is_changed())
+                        {
+                                Sleep(100);
+                                continue;
+                        }else{
+                                _set_change(TRUE);
+                                RenderScene();
+                        }
 			//Rectangle(m_hDC, 0, 0, 100, 100);
 			Sleep(0);
 			break;
@@ -229,6 +260,8 @@ BOOL _render_create_thread()
 	}
 
 	InitializeCriticalSection(&cs);
+        InitializeCriticalSection(&cs_changed);
+
         hEvent = CreateEvent(&sa, TRUE, FALSE, "PauseEvent");
 
 	hThread = CreateThread(&sa, 0, 
@@ -356,6 +389,12 @@ BOOL render_stop()
 	
         printf("Stopped.\n");
         return TRUE;
+}
+
+
+void _render_render(void)
+{
+        _set_change(TRUE);
 }
 
 int render_create_object(void* buffer, int len, int type)
