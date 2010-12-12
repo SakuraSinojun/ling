@@ -1,4 +1,10 @@
 
+/*
+
+        Author: Sakura
+        Tab:    8(Space)
+
+*/
 
 
 #include "game.h"
