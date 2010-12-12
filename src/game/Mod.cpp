@@ -16,6 +16,14 @@
 
 
 
+/*
+
+    >> Warning <<
+        按住鼠标再按ESC来退出游戏会卡住线程锁，如果没有其它问题只需加个
+    MessageBox卡住线程即可。现在可以同时检测多个按键。
+
+*/
+
 
 namespace       Mod
 {
@@ -180,9 +188,9 @@ namespace       Mod
 
         void QuitMod()
         {
-                DWORD   tid;
-                DWORD   pid;
-                tid = GetWindowThreadProcessId(m_hWnd, &pid);
+                //DWORD   tid;
+                //DWORD   pid;
+                //tid = GetWindowThreadProcessId(m_hWnd, &pid);
                 PostMessage(m_hWnd, WM_CLOSE, 0, 0);
                 /*
                 if(!PostThreadMessage(tid, WM_USER + 0x401, 0, 0))
@@ -191,6 +199,7 @@ namespace       Mod
                 }
                 */
         }
+        
 ///////////////////////////////////////////////////////////////////////////////////////
 //
 //
