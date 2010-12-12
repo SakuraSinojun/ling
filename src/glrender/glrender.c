@@ -14,6 +14,19 @@
 #include <GL/glu.h>
 #include <math.h>
 
+
+typedef struct GAME_OBJECT
+{
+        int     obj_id;
+
+}GAME_OBJECT;
+
+
+typedef struct OBJECTMAP
+{
+        void *  object;
+}OBJECTMAP, *POBJECTMAP;
+
 typedef enum GAME_STATE
 {
 	ST_INIT = 0,
@@ -22,17 +35,18 @@ typedef enum GAME_STATE
 	ST_STOP,
 }GAME_STATE;
 
-static HWND	m_hWnd = NULL;
-static HDC	m_hDC = NULL;
-static HGLRC	m_hRC = NULL;
-static HANDLE	hThread = NULL;
-static DWORD	lpThreadId = 0; 
+static HWND     m_hWnd = NULL;
+static HDC      m_hDC = NULL;
+static HGLRC    m_hRC = NULL;
+static HANDLE   hThread = NULL;
+static DWORD    lpThreadId = 0; 
 static HANDLE   hEvent = NULL;
 static BOOL     bObjectChanged = TRUE;
 
-static GAME_STATE       m_State = ST_INIT;
-static CRITICAL_SECTION	cs;
-static CRITICAL_SECTION	cs_changed;
+static GAME_STATE               m_State = ST_INIT;
+static CRITICAL_SECTION         cs;
+static CRITICAL_SECTION         cs_changed;
+//static POBJECTMAP       *       object_map;
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -68,9 +82,9 @@ void _set_change(BOOL bChange)
 
 void _render_error(const char * string, ...)
 {
-	FILE *	fp;
-	char	buffer[1024];
-        va_list	arglist;
+	FILE    *fp;
+	char    buffer[1024];
+        va_list arglist;
 
         if (NULL == string)
         {
@@ -133,10 +147,10 @@ void _render_calcFPS()
 
 DWORD WINAPI _render_thread(LPVOID lpParameter)
 {
-	enum GAME_STATE s;
-	RECT	orc;
-	RECT	rect;
-	BOOL    flag;
+	GAME_STATE      s;
+	RECT	        orc;
+	RECT	        rect;
+	BOOL            flag;
 
 	memset(&orc, 0, sizeof(RECT));
 	
