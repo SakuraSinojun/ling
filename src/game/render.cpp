@@ -101,7 +101,7 @@ BOOL CRender::InitRender(const char * strRenderDLLName)
 	funs.render_pause = (void *)GetProcAddress(hModule, "render_pause");
 	funs.render_start = (void *)GetProcAddress(hModule, "render_start");
 	funs.render_stop = (void *)GetProcAddress(hModule, "render_stop");
-	funs.render_RenderScene = (void *)GetProcAddress(hModule, "RenderScene");
+	funs.render_RenderScene = (void *)GetProcAddress(hModule, "_render_render");
 	funs.render_create_object = (void *)GetProcAddress(hModule, "render_create_object");
 	funs.render_create_panel = (void *)GetProcAddress(hModule, "render_create_panel");
 	funs.render_create_map = (void *)GetProcAddress(hModule, "render_create_map");

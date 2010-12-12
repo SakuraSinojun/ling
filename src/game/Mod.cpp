@@ -1,5 +1,7 @@
 
 
+#define __DEBUG__MOD_CPP__
+
 #include "../common/common.h"
 #include "mod.h"
 #include "game.h"
@@ -8,7 +10,10 @@
 
 
 
+
+
 #include <windows.h>
+
 
 
 
@@ -72,6 +77,10 @@ namespace       Mod
 
         void ParseInput(INPUT_STRUCT& input)
         {
+                static POINT    oldpoint;
+                RECT            rect;
+                POINT           point;
+
                 if(!bModLoaded)
                 {
                         return;
@@ -111,9 +120,24 @@ namespace       Mod
 
                 //MouseMove(wi.x, wi.y);
 
+                GetClientRect(m_hWnd, &rect);
+                
                 if(IsMainMenu())
                 {
-                        PaintMainMenu();
+                        point.x = wi.x;
+                        point.y = wi.y;
+                        if( PtInRect(&rect, point) && (oldpoint.x != wi.x || oldpoint.y != wi.y) )
+                        {
+                                if(     PtInRect(&rcStart, point) != PtInRect(&rcStart, oldpoint) ||
+                                        PtInRect(&rcQuit, point) != PtInRect(&rcQuit, oldpoint)
+                                )
+                                {
+                                        InvalidateRect(m_hWnd, NULL, FALSE);
+                                        oldpoint.x = wi.x;
+                                        oldpoint.y = wi.y;
+                                }
+                        }
+                        //PaintMainMenu();
                 }
         }
         
@@ -209,7 +233,7 @@ namespace       Mod
                 char            path[1024];
                 POINT           point;
                 HBRUSH          hBrush;
-                HPEN            hPen;
+                //HPEN            hPen;
                 HBRUSH          oldBrush;
                 UINT            fmt;
                 char            temp[100];
