@@ -15,8 +15,8 @@ LOUT	= -o
 VPATH = .\game: .\common: .\win32: .\glrender
 OUTPATH = ..\release
 
-TARGET = ling.exe
-RENDER = glrender.dll
+TARGET = $(OUTPATH)\ling.exe
+RENDER = $(OUTPATH)\glrender.dll
 
 #$(wildcard *.o)
 
@@ -35,20 +35,19 @@ OBJS = 	error.o \
 	render.o
 
 
-all:  $(RENDER) $(TARGET)
+all: $(RENDER) $(TARGET)
 
 $(TARGET): $(OBJS)
 	@echo Linking $@ ...
-	$(LD) $(OBJS) $(LFTRGT) $(LOUT)$(OUTPATH)\$@
+	$(LD) $(OBJS) $(LFTRGT) $(LOUT)$@
 	@echo ---------------------------------
 	@echo done.
 
 $(RENDER): glrender.o
 	@echo Linking $@ ...
-	$(LD) glrender.o $(LFRNDR) $(LOUT)$(OUTPATH)\$@
+	$(LD) glrender.o $(LFRNDR) $(LOUT)$@
 	@echo ---------------------------------
 	@echo done.
-
 
 .cpp.o:
 	@echo Compling $@ ...
@@ -60,9 +59,7 @@ $(RENDER): glrender.o
 	$(CC) $< $(CFLAGS) $(COUT)$@
 	@echo ---------------------------------
 
-
-
-.PHONY: clean
+.PHONY: all clean
 
 clean:
 	del *.o /Q
