@@ -1,0 +1,71 @@
+
+
+
+
+
+大写表示文件夹,小写表示文件
+
+
+MOD_ROOT
+        config
+        SPELLS
+                extra_spell_1.dll
+                extra_spell_2.dll
+                ...
+        ADVAN
+                advantage_1.dll
+                ...
+        SKILL
+                skill_1.dll
+                ...
+        ITEMS
+                extra_item_1.item(也可能是dll)
+                extra_item_2.item
+                ...
+        MAPS            (注意需要增加一个其它层的链接)
+                map_1.map       (参照MapEdit定义的格式)
+                map_1_triggers.def 
+                map_1_spirits.def
+                ...
+        SOUNDS
+                sound1.wav
+                sound2.wav
+                ...
+        IMAGES          (存放各个位置需要用到的位图)
+                image1.bmp
+                image2.bmp
+                ...
+        CREATURES       (生物基本属性)
+                npc_1.creature
+                monster_1.creature
+                ...
+        SCRIPTS
+                main_script.dll
+                npc_1_ai.dll
+                monster_1_ai.dll
+                trigger1.dll
+                ...
+        TEXT
+                talk1.conversation   (要处理分支)
+                text1.text           (纯文本.)
+                ...
+                
+                
+
+说明：
+        SPELL中存放所有可用法术。每个DLL只提供一个法术。
+    法术的名称与效果均由dll提供相应的函数取得。
+    加载模组时，遍历所有spells中的dll，取得可用法术列表。
+
+        ADVAN和SKILL同SPELL类似。
+        
+        .item文件只是物品属性的描述文件。如果物品没有复杂的效果，可以不必做成
+    DLL，只在需要的时候关联脚本即可。
+
+        .creature文件同.item文件类似.
+        
+        SCRIPT中的主脚本文件可以根据config文件中的描述来定名。
+        config文件中除提供脚本文件名外，应该还提供游戏主登入界面的背景图片索
+    引以及模组名称等信息。。。
+
+
