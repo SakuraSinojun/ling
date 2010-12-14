@@ -8,16 +8,17 @@
 
 MOD_ROOT
         config
+        charge.cfg
         SPELLS
                 extra_spell_1.dll
                 extra_spell_2.dll
                 ...
+                skill_1.dll
+                ...
         ADVAN
                 advantage_1.dll
                 ...
-        SKILL
-                skill_1.dll
-                ...
+                
         ITEMS
                 extra_item_1.item(也可能是dll)
                 extra_item_2.item
@@ -35,7 +36,7 @@ MOD_ROOT
                 image1.bmp
                 image2.bmp
                 ...
-        CREATURES       (生物基本属性)
+        CREATURES       (生物基本属性。这里确定不用DLL么？)
                 npc_1.creature
                 monster_1.creature
                 ...
@@ -48,6 +49,10 @@ MOD_ROOT
         TEXT
                 talk1.conversation   (要处理分支)
                 text1.text           (纯文本.)
+                ...
+        3DS
+                xxx.3ds
+                xxx.3ds
                 ...
                 
                 
@@ -67,5 +72,56 @@ MOD_ROOT
         SCRIPT中的主脚本文件可以根据config文件中的描述来定名。
         config文件中除提供脚本文件名外，应该还提供游戏主登入界面的背景图片索
     引以及模组名称等信息。。。
+
+
+
+
+
+
+文件格式:
+
+模组配置文件:
+config
+        mod_name
+        mod_version
+        
+价值表(即增减一个法术、技能、优势所需CP数):
+charge.cfg
+        charge_ST
+        charge_DX
+        charge_IQ
+        charge_HT
+        charge_map
+            id
+            charge
+            ...
+            
+生物描述文件:
+.creature:
+        name                                            CHAR[100]                  
+        desc                                            CHAR[1024]
+        ST                                              DWORD
+        DX                                              DWORD
+        IQ                                              DWORD
+        HT                                              DWORD
+        HP              = ST                            DWORD
+        Will            = IQ                            DWORD
+        Per             = IQ                            DWORD
+        FP              = HT                            DWORD
+        Basic_Speed     = (double)(HT + DX) / 4.0       DOUBLE
+        Dodge           = (int)Basic_Speed + 3          DWORD
+        Basic_Move      = (int)Basic_Speed              DWORD
+        AI_DLL                                          CHAR[100]
+
+
+
+
+
+
+
+
+
+
+
 
 
