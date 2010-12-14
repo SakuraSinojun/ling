@@ -1,0 +1,6 @@
+
+
+
+IMG_MENU        = tuzikism.bmp
+DESC_BONES      = texts/bones.txt
+AI_BONES        = script/bones.dll
