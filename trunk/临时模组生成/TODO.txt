@@ -1,0 +1,13 @@
+
+
+config                          ok
+charge.cfg
+fireball.dll                    ok
+advan1.dll
+item1.item
+map1.map
+creatures.txt
+trigger1.dll
+monster_ai.dll
+npc_ai.dll
+talk1.conversation

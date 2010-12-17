@@ -1,0 +1,63 @@
+
+
+
+                                buff
+                                 
+
+    这里的buff是所有的有益状态（buff）与不利状态（debuff）的统称。
+
+    根据生效时间不同，buff可分为行动前buff，时间型buff。
+    
+    这里的行动指所有论到当前生物的事件，包括行动回合，或者判定时刻。
+    
+    行动前buff，实际上就是一些持续影响性的buff。比如属性改变，技能改变，昏睡、麻
+痹等。
+    时间型buff，就是一些类似每隔多久受到一次伤害的状态。比如中毒等。
+    
+    
+struct BUFF_STRUCT
+{
+        buff_name;
+        buff_desc;
+        affect_time;         
+        start_time;
+        Parameter;
+        ...
+};
+
+注册：
+register_buff(BUFF_STRUCT)
+        或者add_buff临时注册
+
+回调：
+on_buff(caster, target, BUFF_STRUCT, __out CREATURE_STRUCT );
+        注意这里on_buff中如果再次取得target状态时，会出现回环调用。
+        比如一个持结性buff，效果是使目标will-2，每回合开始进行will检定，成功则
+    buff结束。
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
