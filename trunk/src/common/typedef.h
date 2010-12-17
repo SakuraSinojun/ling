@@ -13,7 +13,7 @@
 
 	
 
-typedef long			G_INT32;
+typedef int			G_INT;
 typedef long			G_LONG;
 typedef char			G_CHAR;
 typedef float			G_FLOAT;
