@@ -52,10 +52,8 @@ typedef struct tagSPELLSTRUCT
 }SPELL_STRUCT, SPELL, *PSPELL;
 
 
-typedef struct CREATURES
+typedef struct PROPERTY
 {
-        DWORD           obj_index;
-        DWORD           camp;           // Hero， 商人， 平民， 敌对
         DWORD           ST;
         DWORD           DX;
         DWORD           IQ;
@@ -64,6 +62,16 @@ typedef struct CREATURES
         DWORD           Will;
         DWORD           Perp;
         DWORD           FP;
+}PROPERTY;
+
+typedef struct CREATURES
+{
+        DWORD           obj_index;
+        DWORD           camp;           // Hero， 商人， 平民， 敌对
+        PROPERTY        property_base;
+        PROPERTY        property_extra;
+        
+        
         BOOL            isDead;
         
         PADVAN          advans;         // 优劣势表。

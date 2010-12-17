@@ -3,6 +3,7 @@
 
                                 buff
                                  
+revision: 1
 
     这里的buff是所有的有益状态（buff）与不利状态（debuff）的统称。
 
@@ -37,6 +38,15 @@ on_buff(caster, target, BUFF_STRUCT, __out CREATURE_STRUCT );
     
 
 
+
+revision: 2
+        
+        
+        buff详细分类：
+        
+        BUFF_PROPERTY           // 影响基本状态的buff。这类基本不需要多次回调。
+        BUFF_ONTIMER             // 按时间影响。
+        BUFF_
 
 
 
