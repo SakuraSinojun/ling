@@ -37,14 +37,19 @@ int spirit_get_state_pos_z(int spirit)
 
 
 // 法术
-int spell_register_buff(const char * buff_name ,const char * buff_desc, int buff_type)
+int spell_give_timer_buff(int id_target, const char * buff_name ,const char * buff_desc, int uElapse, LPFNBUFFPROC lpfnBuffCallBack)
 {
-	return 0;
+        return 0;
 }
 
-int spell_give_buff(int id_target, int id_buff)
+int spell_give_property_buff(int id_target, const char * property, const char * bonus, int lasttime)
 {
-	return 0;
+        return 0;
+}
+
+int spell_remove_buff(int id_target, int id_buff)
+{
+        return 0;
 }
 
 int spell_create_spirit(const char * spirit_mod, double angle, int createlight, int prameter)
@@ -59,7 +64,7 @@ int spell_delete_spirit(int id_spirit)
 
 
 // 生物
-int creature_test_defence(int id_creature, const char * testwhat)
+int creature_test_defence(int id_creature, const char * testwhat, int difficulty_class)
 {
 	return 0;
 }
@@ -74,6 +79,10 @@ int creature_heal(int id_creature, int healvolume)
 	return 0;
 }
 
+int creature_get_property(int id_creature, const char * property)
+{
+        return 0;
+}
 
 
 
