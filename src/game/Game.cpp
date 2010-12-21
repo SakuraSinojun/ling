@@ -43,7 +43,7 @@ DWORD WINAPI _game_thread(LPVOID lpParameter)
         GAME_STATE	st;
         INPUT_STRUCT	input;
 
-        while(TRUE)
+        for(;;)
         {
                 EnterCriticalSection(&cs);
                         st = state;

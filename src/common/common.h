@@ -12,9 +12,17 @@
 #ifndef __COMMON_H__
 #define __COMMON_H__
 
+
+#define __GAME_DEBUG_MESSAGE__
+
 #include "comdef.h"
 #include "typedef.h"
+
 #include "debug.h"
+
+#define printf  __out_debug_
+#define new NEW_DEBUG                   // 这句要在debug.h后。
+
 
 #ifndef __cplusplus
 #define common::Error   Error
@@ -24,7 +32,8 @@
 #define res::loadimg    loadimg
 #endif
 
-#define printf  __out_debug_
+
+
 
 
 
@@ -33,11 +42,13 @@ namespace common
 {
 #endif
         void Error(const char * string, ...);			// error.cpp
-
 #ifdef __cplusplus
 }
 #endif
 
+
+bool file_exists(const char * file);
+char * GetGamePath();
 
 
 // 这个名字空间里的函数用于加载文件.
