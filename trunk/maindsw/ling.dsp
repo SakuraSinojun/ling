@@ -66,7 +66,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /GZ /c
-# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /FR /YX /FD /GZ /c
+# ADD CPP /nologo /MTd /W3 /WX /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /FR /YX /FD /GZ /c
 # ADD BASE RSC /l 0x804 /d "_DEBUG"
 # ADD RSC /l 0x804 /d "_DEBUG"
 BSC32=bscmake.exe
@@ -85,6 +85,14 @@ LINK32=link.exe
 # Begin Group "WIN32"
 
 # PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\src\win32\Display.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\win32\Display.h
+# End Source File
 # Begin Source File
 
 SOURCE=..\src\win32\main.cpp
@@ -108,6 +116,14 @@ SOURCE=..\src\game\Game.cpp
 # Begin Source File
 
 SOURCE=..\src\game\Game.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\game\gameconfig.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\game\gameconfig.h
 # End Source File
 # Begin Source File
 
@@ -171,11 +187,19 @@ SOURCE=..\src\common\comdef.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\src\common\common.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\src\common\common.h
 # End Source File
 # Begin Source File
 
 SOURCE=..\src\common\datafile.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\src\common\debug.cpp
 # End Source File
 # Begin Source File
 

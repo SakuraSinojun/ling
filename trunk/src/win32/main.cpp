@@ -5,17 +5,20 @@
 #include "../game/game.h"
 #include "../game/mod.h"
 #include "../game/input.h"
+#include "../game/gameconfig.h"
 
+
+#include "display.h"
 
 #include <windows.h>
-#include <stdio.h>
+
 
 
 
 static HWND m_hWnd = NULL;
 static CRITICAL_SECTION  cs;
 
-BOOL OnIdle(LONG count);
+BOOL OnIdle();
 void CreateLingWindow(WNDPROC _lpfnWindowProc, int width, int height, bool onidle);
 
 
@@ -27,6 +30,35 @@ HWND GetMainHwnd()
         return m_hWnd;
 }
 
+
+void SwitchFullScreen(BOOL bFull)
+{
+        CDisplay * display = CDisplay::Get();
+        CGameConfig *   pConfig = CGameConfig::Get();
+        LONG    style;
+
+        
+        if(m_hWnd == NULL)
+        {       
+                return ;
+        }
+        
+        style = GetWindowLong(m_hWnd, GWL_STYLE);
+
+        if(bFull)
+        {
+                style &= ~WS_CAPTION;
+                MoveWindow (m_hWnd, 0, 0, pConfig->WindowWidth(), pConfig->WindowHeight(), FALSE);
+                display->ChangeDisplayMode (pConfig->WindowWidth(), pConfig->WindowHeight());
+        }else{
+                style |= WS_CAPTION;
+                display->RestoreDisplayMode ();
+        }
+        
+        SetWindowLong(m_hWnd, GWL_STYLE, style);
+
+
+}
 
 void CreateLingWindow(WNDPROC _lpfnWindowProc, int width, int height, bool onidle = false)
 {
@@ -48,7 +80,7 @@ void CreateLingWindow(WNDPROC _lpfnWindowProc, int width, int height, bool onidl
 	wndclas.style		= CS_VREDRAW | CS_HREDRAW | CS_OWNDC; 
 	RegisterClass(&wndclas); 
 	
-	DWORD	dwStyle = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_DLGFRAME;
+	DWORD	dwStyle = WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX ;
 	RECT	rect;
 	rect.left = 0;
 	rect.top = 0;
@@ -77,7 +109,7 @@ void CreateLingWindow(WNDPROC _lpfnWindowProc, int width, int height, bool onidl
 
 	if(onidle)
 	{
-		while(true)
+		for(;;)
 		{
 			if (::PeekMessage(&msgCur, NULL, 0, 0, PM_NOREMOVE))
 			{
@@ -101,14 +133,14 @@ void CreateLingWindow(WNDPROC _lpfnWindowProc, int width, int height, bool onidl
 			}else if (idle){
 				if(count==MAXLONG)
 					count=0;
-				if(!OnIdle(count++))
+				if(!OnIdle())
 					idle = false;
 			}else{
 				::WaitMessage();
 			}
 		}
 	}else{
-                while(true)
+                for(;;)
                 {
                         /*
 		        if(PeekMessage(&msgCur, NULL, 0, 0, PM_NOREMOVE))
@@ -131,19 +163,16 @@ void CreateLingWindow(WNDPROC _lpfnWindowProc, int width, int height, bool onidl
 	return ;
 }
 
-
-
-
 ////////////////////////////////////////////////////////////////////////////////
 
 
-BOOL OnIdle(LONG count)
+BOOL OnIdle()
 {
 	return TRUE;
 }
 
 
-void OnPaint(HWND hWnd, HDC hdc)
+void OnPaint()
 {
         Mod::PaintMainMenu();
         CRender::Get()->RenderScene ();
@@ -158,10 +187,12 @@ void OnCreate(HWND hWnd)
 
         CGame * game = CGame::Get();
         CRender * render = CRender::Get();
+        CGameConfig * config = CGameConfig::Get();
         
+
         Input::AtachInput (hWnd);
 
-        if(!render->InitRender("glrender.dll"))
+        if(!render->InitRender(config->GetRender()))
         {
                 common::Error("no render dll...");
                 MessageBox(hWnd, "ÕÒ²»µ½äÖÈ¾ÒýÇæ¡£", "´íÎó", MB_OK);
@@ -185,10 +216,15 @@ void OnClose()
 {       
         CGame * game = CGame::Get();
         CRender * render = CRender::Get();
-        
+        CDisplay * display = CDisplay::Get();
+
+        display->RestoreDisplayMode ();
         game->Stop();
         render->Stop();
 
+        delete display;
+        delete render;
+        delete game;
         
 }
 
@@ -198,7 +234,10 @@ LRESULT CALLBACK _WndProc(HWND hwnd, UINT uMsg, WPARAM wParam,LPARAM lParam)
 { 
 
         PAINTSTRUCT 	ps;
-	
+	CGameConfig *   pConfig;
+        // CGame *         game; 
+        // CRender *       render; 
+
 	switch(uMsg) 
 	{
 	case WM_CREATE:
@@ -213,20 +252,45 @@ LRESULT CALLBACK _WndProc(HWND hwnd, UINT uMsg, WPARAM wParam,LPARAM lParam)
 		break;
         case WM_PAINT:
                 BeginPaint(hwnd, &ps);
-                OnPaint(hwnd, ps.hdc);
+                OnPaint();
                 EndPaint(hwnd, &ps);
+                break;
+        case WM_KILLFOCUS:
+                // game = CGame::Get();
+                // render = CRender::Get();
+                // game->Pause ();
+                // render->Pause ();
+                SwitchFullScreen(FALSE);
+                // ShowWindow(hwnd, SW_MINIMIZE);
+                break;
+        case WM_SETFOCUS:
+                pConfig = CGameConfig::Get();
+                // game = CGame::Get();
+                // render = CRender::Get();
+
+                // render->Start ();
+                // game->Run ();      
+
+                if(pConfig->IsFullScreen ())
+                {
+                        SwitchFullScreen(TRUE);
+                }
                 break;
         case WM_ERASEBKGND:
 	default:
-		return DefWindowProc(hwnd,uMsg,wParam,lParam); 
-	} 
+	        return DefWindowProc(hwnd,uMsg,wParam,lParam); 
+	}
+
+	
  	return 0; 
 }
  
 
-int main(int argc, char ** argv)
+int main()
 {
-	CreateLingWindow(_WndProc, 800, 600, false);
+        CGameConfig *   pConfig = CGameConfig::Get();
+
+	CreateLingWindow(_WndProc, pConfig->WindowWidth(), pConfig->WindowHeight(), false);
 	return 0;
 }
 

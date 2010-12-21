@@ -32,8 +32,11 @@ OBJS = 	error.o \
 	Mod.o \
 	Monster.o \
 	Npc.o \
-	render.o
-
+	render.o \
+	debug.o \
+	common.o \
+	gameconfig.o \
+        display.o
 
 all: $(RENDER) $(TARGET)
 

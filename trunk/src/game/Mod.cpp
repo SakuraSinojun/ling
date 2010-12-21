@@ -61,7 +61,7 @@ namespace       Mod
                 memset(&ms, 0, sizeof(ms));
                 strcpy(ms.modpath, modpath);
                 strcpy(ms.modname, "≤‚ ‘MOD");
-                strcpy(ms.menubgpic, "tuzikism.bmp");
+                strcpy(ms.menubgpic, "mainmenu.bmp");
                 InitializeCriticalSection (&cs);
 
                 rcStart.left = 100;
