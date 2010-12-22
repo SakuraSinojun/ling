@@ -1,5 +1,6 @@
 
 
+#define _CRT_SECURE_NO_WARNINGS
 
 #include <windows.h>
 #include "debug.h"
@@ -37,6 +38,21 @@ static memory_link * _find_link(void * ptr)
         return NULL;
 }
 
+void __out_debug_(const char * string, ...)
+{
+        char buffer[1024];
+        va_list arglist;
+
+        if (NULL == string)
+        {
+                return;
+        }
+                                        
+        va_start(arglist, string);
+        vsprintf(buffer, string, arglist);
+        va_end(arglist);	
+        (printf)(buffer); 
+}
 
 void * malloc_debug(    unsigned int num_bytes,
                         const char * file,

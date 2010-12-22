@@ -6,6 +6,9 @@
         
 *******************************************************************************/
 
+
+#define _CRT_SECURE_NO_WARNINGS
+
 #include "dxrender.h"
 #include <windows.h>
 #include <stdio.h>

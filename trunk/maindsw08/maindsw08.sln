@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ling", "ling.vcproj", "{503AA535-A6B8-48C0-ABFF-4AF3867A8C2B}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "dxrender", "dxrender.vcproj", "{98F6A24F-AB97-44BC-86EC-1B3BA53F9714}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "glrender", "glrender.vcproj", "{2DEF66D5-B83B-4A34-AAF4-95CFE8793E90}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{503AA535-A6B8-48C0-ABFF-4AF3867A8C2B}.Debug|Win32.ActiveCfg = Debug|Win32
+		{503AA535-A6B8-48C0-ABFF-4AF3867A8C2B}.Debug|Win32.Build.0 = Debug|Win32
+		{503AA535-A6B8-48C0-ABFF-4AF3867A8C2B}.Release|Win32.ActiveCfg = Release|Win32
+		{503AA535-A6B8-48C0-ABFF-4AF3867A8C2B}.Release|Win32.Build.0 = Release|Win32
+		{98F6A24F-AB97-44BC-86EC-1B3BA53F9714}.Debug|Win32.ActiveCfg = Debug|Win32
+		{98F6A24F-AB97-44BC-86EC-1B3BA53F9714}.Debug|Win32.Build.0 = Debug|Win32
+		{98F6A24F-AB97-44BC-86EC-1B3BA53F9714}.Release|Win32.ActiveCfg = Release|Win32
+		{98F6A24F-AB97-44BC-86EC-1B3BA53F9714}.Release|Win32.Build.0 = Release|Win32
+		{2DEF66D5-B83B-4A34-AAF4-95CFE8793E90}.Debug|Win32.ActiveCfg = Debug|Win32
+		{2DEF66D5-B83B-4A34-AAF4-95CFE8793E90}.Debug|Win32.Build.0 = Debug|Win32
+		{2DEF66D5-B83B-4A34-AAF4-95CFE8793E90}.Release|Win32.ActiveCfg = Release|Win32
+		{2DEF66D5-B83B-4A34-AAF4-95CFE8793E90}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

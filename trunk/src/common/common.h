@@ -12,6 +12,7 @@
 #ifndef __COMMON_H__
 #define __COMMON_H__
 
+#define _CRT_SECURE_NO_WARNINGS
 
 #define __GAME_DEBUG_MESSAGE__
 

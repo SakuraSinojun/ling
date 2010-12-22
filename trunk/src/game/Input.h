@@ -16,7 +16,7 @@
 #include "../common/common.h"
 #include <windows.H>
 
-enum INPUT
+enum GAMEINPUT
 {
         INPUT_NONE,
         INPUT_NEWINPUT,
