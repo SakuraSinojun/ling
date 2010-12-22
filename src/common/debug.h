@@ -5,10 +5,13 @@
 #ifndef __DEBUG_H__
 #define __DEBUG_H__
 
+#define _CRT_SECURE_NO_WARNINGS
+
 
 #include <stdio.h>
 #include <stdarg.h>
 #include <malloc.h>
+
 
 
 #define __GAME_DEBUG_MESSAGE__
@@ -29,22 +32,7 @@
 #define NEW_DEBUG new(__FILE__, __LINE__, __func__)
 
 
-inline void __out_debug_(const char * string, ...)
-{
-        char buffer[1024];
-        va_list arglist;
-
-        if (NULL == string)
-        {
-                return;
-        }
-                                        
-        va_start(arglist, string);
-        vsprintf(buffer, string, arglist);
-        va_end(arglist);	
-        (printf)(buffer); 
-}
-
+void __out_debug_(const char * string, ...);
 void * malloc_debug(    unsigned int num_bytes,
                         const char * file,
                         const int line,
