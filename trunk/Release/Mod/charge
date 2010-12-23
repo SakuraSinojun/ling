@@ -1,9 +1,0 @@
-
-[common charge]
-ST = 10
-DX = 20
-IQ = 20
-HT = 10
-
-[charge map]
-SKILL_NAME = CHARGE

@@ -35,12 +35,6 @@ Package=<5>
 
 Package=<4>
 {{{
-    Begin Project Dependency
-    Project_Dep_Name glrender
-    End Project Dependency
-    Begin Project Dependency
-    Project_Dep_Name dxrender
-    End Project Dependency
 }}}
 
 ###############################################################################

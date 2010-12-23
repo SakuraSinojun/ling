@@ -61,7 +61,10 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="libjpeg08.lib"
 				LinkIncremental="2"
+				AdditionalLibraryDirectories="..\src\libjpeg"
+				IgnoreDefaultLibraryNames="libc;libcmtd"
 				GenerateDebugInformation="true"
 				SubSystem="0"
 				TargetMachine="1"
@@ -92,8 +95,8 @@
 			Name="Release|Win32"
 			OutputDirectory="..\Release"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="2"
-			CharacterSet="1"
+			ConfigurationType="1"
+			CharacterSet="0"
 			WholeProgramOptimization="1"
 			>
 			<Tool
@@ -133,9 +136,12 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="libjpeg08.lib"
 				LinkIncremental="1"
+				AdditionalLibraryDirectories="..\src\libjpeg"
+				IgnoreDefaultLibraryNames="libc"
 				GenerateDebugInformation="true"
-				SubSystem="2"
+				SubSystem="1"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
 				TargetMachine="1"
