@@ -61,7 +61,7 @@ namespace       Mod
                 memset(&ms, 0, sizeof(ms));
                 strcpy(ms.modpath, modpath);
                 strcpy(ms.modname, "≤‚ ‘MOD");
-                strcpy(ms.menubgpic, "mainmenu.bmp");
+                strcpy(ms.menubgpic, "mainmenu.jpg");
                 InitializeCriticalSection (&cs);
 
                 rcStart.left = 100;
@@ -255,7 +255,7 @@ namespace       Mod
                 GetCursorPos(&point);
                 ScreenToClient (m_hWnd, &point);
 
-                wsprintf(path, "%s\\%s", ms.modpath, ms.menubgpic);
+                strcpy(path, "mainmenu.jpg");
                 GetClientRect (m_hWnd, &rect);
                 hdc     = GetDC(m_hWnd);
                 memDC   = CreateCompatibleDC(hdc);

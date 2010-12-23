@@ -6,13 +6,13 @@ CXX     = @g++
 LD      = @g++
 
 CFLAGS  = -c -O -Werror -Wall
-LFTRGT  = -luser32 -lgdi32 -lwinmm -lmsimg32
+LFTRGT  = -luser32 -lgdi32 -lwinmm -lmsimg32 libjpeg\libjpeg.a
 LFRNDR  = -lopengl32 -lglu32 -luser32 -lgdi32 -lwinmm -shared
 
 COUT	= -o
 LOUT	= -o
 
-VPATH = .\game: .\common: .\win32: .\glrender
+VPATH = .\game: .\common: .\win32: .\glrender: .\libs
 OUTPATH = ..\release
 
 TARGET = $(OUTPATH)\ling.exe
@@ -38,7 +38,7 @@ OBJS = 	error.o \
 	gameconfig.o \
         display.o
 
-all: $(RENDER) $(TARGET)
+all: $(TARGET)
 
 $(TARGET): $(OBJS)
 	@echo Linking $@ ...

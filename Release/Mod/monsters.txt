@@ -1,3 +1,0 @@
-# 可以整理到一起。每行表示一个生物。tab隔开每个属性。
-# name	desc	        ST	DX	IQ	HT        AI              模型
-骷髅	DESC_BONES	10	8	2	10	AI_BONES	bones.3ds

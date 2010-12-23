@@ -99,7 +99,7 @@ void * malloc_debug(    unsigned int num_bytes,
         }
         link_tail = temp;
         
-        __out_debug_("分配内存：文件[%s]，函数[%s]，大小[%u]\n", file, function, num_bytes);
+        __out_debug_("分配内存：文件[%s]，行数[%d]，大小[%u]\n", file, line, num_bytes);
         
         return result;
         
@@ -125,7 +125,7 @@ void free_debug(void * ptr)
                 return;
         }
         
-        __out_debug_("释放内存：文件[%s]，函数[%s]，大小[%u]\n", temp->file, temp->func, temp->size);
+        __out_debug_("释放内存：文件[%s]，行数[%d]，大小[%u]\n", temp->file, temp->line, temp->size);
         
         prev = temp->prev;
         next = temp->next;
