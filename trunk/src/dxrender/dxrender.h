@@ -10,8 +10,8 @@
 #pragma once 
 
 
-#ifndef __GLRENDER_H__
-#define __GLRENDER_H__
+#ifndef __DXRENDER_H__
+#define __DXRENDER_H__
 
 
 
